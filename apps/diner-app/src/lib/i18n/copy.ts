@@ -137,8 +137,8 @@ export const COPY = {
   // -- login (D1) -----------------------------------------------------------
   login_title: { en: "Sign in to dine", bn: "খেতে যাওয়ার আগে সাইন ইন করুন" },
   login_d1_notice: {
-    en: "Offers are redeemed only by signed-in diners. Browsing and redemption both need your account — that keeps per-person limits fair.",
-    bn: "শুধুমাত্র সাইন-ইন করা ডাইনাররাই অফার ব্যবহার করতে পারেন। ব্রাউজ ও ব্যবহারের জন্য অ্যাকাউন্ট প্রয়োজন — এতে জনপ্রতি সীমা ন্যায্য থাকে।",
+    en: "Browse deals freely. Sign in only when you are ready to redeem — that keeps per-person limits fair.",
+    bn: "অফারগুলো মুক্তভাবে দেখুন। রিডিম করতে চাইলেই সাইন ইন করুন — এতে জনপ্রতি সীমা ন্যায্য থাকে।",
   },
   login_phone: { en: "Mobile number", bn: "মোবাইল নম্বর" },
   login_phone_hint: {
@@ -292,6 +292,36 @@ export const COPY = {
   method_BANGLA_QR: { en: "Bangla QR", bn: "বাংলা কিউআর" },
   method_BKASH: { en: "bKash", bn: "বিকাশ" },
   method_NAGAD: { en: "Nagad", bn: "নগদ" },
+  // -- public discovery (EatClub-style) ---------------------------------------
+  hero_eyebrow: { en: "Dining deals on BD-PAY", bn: "বিডি-পে-তে ডাইনিং ডিল" },
+  hero_title: {
+    en: "Up to 50% off at restaurants near you",
+    bn: "আপনার কাছের রেস্তোরাঁয় সর্বোচ্চ ৫০% ছাড়",
+  },
+  hero_subtitle: {
+    en: "Merchant-set off-peak deals. Discount applied at payment — no vouchers, no codes.",
+    bn: "রেস্তোরাঁর নির্ধারিত কম-ভিড়ের ডিল। ছাড় পেমেন্টের সময়ই প্রয়োগ — কোনো ভাউচার বা কোড নেই।",
+  },
+  window_lunch: { en: "Lunch", bn: "লাঞ্চ" },
+  window_early_bird: { en: "Early bird", bn: "আর্লি বার্ড" },
+  window_happy_hour: { en: "Happy hour", bn: "হ্যাপি আওয়ার" },
+  window_late: { en: "Late", bn: "লেট" },
+  window_all: { en: "Any time", bn: "যেকোনো সময়" },
+  demo_catalog_banner: {
+    en: "Demo catalog (simulator) — sample Dhaka restaurants for discovery. Not live bank data.",
+    bn: "ডেমো ক্যাটালগ (সিমুলেটর) — ডিসকভারির জন্য নমুনা ঢাকা রেস্তোরাঁ। লাইভ ব্যাংক ডেটা নয়।",
+  },
+  sign_in: { en: "Sign in", bn: "সাইন ইন" },
+  sign_in_to_redeem: {
+    en: "Sign in to redeem",
+    bn: "রিডিম করতে সাইন ইন করুন",
+  },
+  sign_in_to_redeem_hint: {
+    en: "You can browse every deal without an account. Sign in only at payment.",
+    bn: "অ্যাকাউন্ট ছাড়াই সব ডিল দেখা যায়। শুধু পেমেন্টের সময় সাইন ইন করুন।",
+  },
+  browse_results: { en: "restaurants", bn: "টি রেস্তোরাঁ" },
+
 } as const;
 
 export type CopyKey = keyof typeof COPY;

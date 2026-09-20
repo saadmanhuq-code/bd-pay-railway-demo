@@ -13,6 +13,14 @@ import { useLang } from "@/lib/i18n/LangContext";
 import { DualLabel } from "@/lib/i18n/DualLabel";
 import { Shell } from "@/components/Shell";
 
+
+function safeNext(raw: string | null): string {
+  if (!raw) return "/";
+  // Only allow same-origin relative paths (no protocol-relative / open redirects).
+  if (!raw.startsWith("/") || raw.startsWith("//")) return "/";
+  return raw;
+}
+
 export default function LoginPage() {
   const { t } = useLang();
   const router = useRouter();
@@ -51,7 +59,7 @@ export default function LoginPage() {
     try {
       await verifyOtp(phone, otp.trim());
       setDebugOtpCode(null);
-      router.replace("/");
+      router.replace(safeNext(new URLSearchParams(window.location.search).get("next")));
     } catch (err) {
       if (err instanceof ApiError && err.code === "otp_invalid") {
         setError(t("login_otp_invalid"));

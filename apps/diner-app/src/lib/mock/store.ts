@@ -1,3 +1,4 @@
+import { tagsForWindows } from "@/lib/demo/windowTags";
 // In-app deterministic mock state for the diner-app. All seed data derives
 // from fixed constants — no Math.random / Date.now anywhere in the data path
 // (the developer-portal/ops-console mock pattern). The clock is the fixed
@@ -684,6 +685,7 @@ export function listMerchantsMock(params: { area: string; q: string }): DinerMer
       (acc, o) => (o.percent_bps !== null && (acc === null || o.percent_bps > acc) ? o.percent_bps : acc),
       null,
     );
+    const tags = tagsForWindows(live.flatMap((o) => o.windows));
     return {
       merchant_id: m.merchant_id,
       display_name: m.display_name,
@@ -694,6 +696,7 @@ export function listMerchantsMock(params: { area: string; q: string }): DinerMer
       cuisine_bn: m.cuisine_bn,
       live_offer_count: live.length,
       best_percent_bps: best,
+      window_tags: tags,
     };
   });
 }

@@ -1,9 +1,7 @@
 "use client";
 
-// Consumer shell — Bengali-first mobile-leaning chrome: brand bar with
-// language toggle + sign-out, sticky bottom navigation (browse / history).
-// PWA-shell pattern per the talent-1-0 lift row (G5 row 7, gated at this
-// build); offline queue and native push remain activation-scope.
+// Consumer shell — Bengali-first mobile chrome. Browse is always available;
+// history + sign-out require a session. Guests see Sign in instead.
 
 import React from "react";
 import Link from "next/link";
@@ -27,16 +25,26 @@ export function Shell({
     try {
       await dinerLogout();
     } finally {
-      router.replace("/login");
+      router.replace("/");
     }
   }
+
+  const browseActive = pathname === "/" || pathname.startsWith("/merchants");
+  const historyActive = pathname === "/history";
+  const loginNext = pathname.startsWith("/merchants")
+    ? `/login?next=${encodeURIComponent(pathname)}`
+    : "/login?next=/";
 
   return (
     <div className="diner">
       <header className="topbar">
-        <div className="topbar-brand">{t("appName")}</div>
+        <Link href="/" className="topbar-brand">
+          {t("appName")}
+        </Link>
         <div className="topbar-actions">
-          {session ? <span className="topbar-user">{session.customer.phone_masked}</span> : null}
+          {session ? (
+            <span className="topbar-user">{session.customer.phone_masked}</span>
+          ) : null}
           <button
             className="btn btn-small"
             onClick={() => setLang(lang === "bn" ? "en" : "bn")}
@@ -48,20 +56,31 @@ export function Shell({
             <button className="btn btn-small" onClick={() => void onSignOut()}>
               {t("sign_out")}
             </button>
-          ) : null}
+          ) : (
+            <Link className="btn btn-small btn-primary" href={loginNext}>
+              {t("sign_in")}
+            </Link>
+          )}
         </div>
       </header>
       <main className="content">{children}</main>
-      {session ? (
-        <nav className="bottom-nav" aria-label="main">
-          <Link href="/" className={`bottom-link ${pathname === "/" || pathname.startsWith("/merchants") ? "active" : ""}`}>
-            {t("nav_browse")}
-          </Link>
-          <Link href="/history" className={`bottom-link ${pathname === "/history" ? "active" : ""}`}>
+      <nav className="bottom-nav" aria-label="main">
+        <Link href="/" className={`bottom-link ${browseActive ? "active" : ""}`}>
+          {t("nav_browse")}
+        </Link>
+        {session ? (
+          <Link
+            href="/history"
+            className={`bottom-link ${historyActive ? "active" : ""}`}
+          >
             {t("nav_history")}
           </Link>
-        </nav>
-      ) : null}
+        ) : (
+          <Link href={loginNext} className="bottom-link">
+            {t("sign_in")}
+          </Link>
+        )}
+      </nav>
     </div>
   );
 }

@@ -90,10 +90,8 @@ export async function GET(req: NextRequest, ctx: Ctx): Promise<NextResponse> {
     return NextResponse.json(body, { status: 200 });
   }
 
-  // Everything else on the diner surface requires the customer principal
-  // (offer discovery is customer-JWT-scoped — errata S18-E16).
-  if (!(await hasSession(req))) return unauthenticated();
-
+  // Public discovery (EatClub-style): merchant directory + eligible offers
+  // are browseable without a session. Reservation/pay remain session-gated.
   if (p[1] === "diner" && p[2] === "merchants" && p.length === 3) {
     return page(listMerchantsMock({ area: q.get("area") ?? "", q: q.get("q") ?? "" }));
   }
@@ -124,6 +122,9 @@ export async function GET(req: NextRequest, ctx: Ctx): Promise<NextResponse> {
       }),
     );
   }
+
+  // Authenticated diner surface (history, intents, QR) requires a session.
+  if (!(await hasSession(req))) return unauthenticated();
 
   if (p[1] === "payment-intents") {
     if (p.length === 2) {

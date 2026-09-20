@@ -16,9 +16,7 @@ import {
   confirmPaymentIntent,
   createOfferIntent,
   demoDinerPay,
-  eligibleOffers,
   issueDynamicQr,
-  listDinerMerchants,
 } from "@/lib/api/client";
 import type {
   CheckoutMethod,
@@ -36,6 +34,7 @@ import { DualLabel } from "@/lib/i18n/DualLabel";
 import { REASON_COPY, REFUSAL_COPY, type CopyKey } from "@/lib/i18n/copy";
 import { Shell } from "@/components/Shell";
 import { QrCode } from "@/components/QrCode";
+import { discoverMerchantOffers } from "@/lib/demo/discover";
 
 const METHOD_KEYS: Record<CheckoutMethod, CopyKey> = {
   BANGLA_QR: "method_BANGLA_QR",
@@ -48,7 +47,7 @@ function money(lang: "bn" | "en", minor: number): string {
 }
 
 export default function MerchantOffersPage() {
-  const { session, loading } = useSession();
+  const { session, loading } = useSession(false);
   const { lang, t } = useLang();
   const params = useParams<{ merchant_id: string }>();
   const merchantId = typeof params.merchant_id === "string" ? params.merchant_id : "";
@@ -69,21 +68,22 @@ export default function MerchantOffersPage() {
 
   const [demoAmountRaw, setDemoAmountRaw] = useState("");
   const [demoSuccess, setDemoSuccess] = useState<DinerPayResult | null>(null);
+  const [source, setSource] = useState<"api" | "demo">("api");
 
   const load = useCallback(() => {
-    if (!session) return;
     if (merchantId === "") {
       setLoadError(t("error_generic"));
       return;
     }
-    Promise.all([listDinerMerchants({}), eligibleOffers({ merchant_id: merchantId })])
-      .then(([merchants, eligible]) => {
-        setMerchant(merchants.data.find((m) => m.merchant_id === merchantId) ?? null);
-        setOffers(eligible.data);
+    discoverMerchantOffers(merchantId)
+      .then((result) => {
+        setMerchant(result.merchant);
+        setOffers(result.offers);
+        setSource(result.source);
         setLoadError(null);
       })
       .catch(() => setLoadError(t("error_generic")));
-  }, [session, merchantId, t]);
+  }, [merchantId, t]);
 
   useEffect(() => {
     load();
@@ -200,7 +200,7 @@ export default function MerchantOffersPage() {
     return null;
   }
 
-  if (loading || !session) {
+  if (loading) {
     return (
       <Shell session={null}>
         <p>{t("loading")}</p>
@@ -210,6 +210,11 @@ export default function MerchantOffersPage() {
 
   return (
     <Shell session={session}>
+      {source === "demo" ? (
+        <p className="notice demo-banner" role="status">
+          {t("demo_catalog_banner")}
+        </p>
+      ) : null}
       {loadError ? <p className="error-text">{loadError}</p> : null}
       {merchant ? (
         <>
@@ -349,14 +354,33 @@ export default function MerchantOffersPage() {
                     {offer.allowed_methods.map((m) => t(METHOD_KEYS[m])).join(", ")}
                   </span>
                 </div>
-                <button className="btn btn-primary btn-block" onClick={() => selectOffer(offer)}>
-                  {t("offer_select")}
-                </button>
+                {session ? (
+                  <button className="btn btn-primary btn-block" onClick={() => selectOffer(offer)}>
+                    {t("offer_select")}
+                  </button>
+                ) : (
+                  <Link
+                    className="btn btn-primary btn-block"
+                    href={`/login?next=${encodeURIComponent(`/merchants/${merchantId}`)}`}
+                  >
+                    {t("sign_in_to_redeem")}
+                  </Link>
+                )}
               </div>
             ))
           )}
 
-          {selected ? (
+          
+          {!session ? (
+            <p className="notice">
+              {t("sign_in_to_redeem_hint")}{" "}
+              <Link href={`/login?next=${encodeURIComponent(`/merchants/${merchantId}`)}`}>
+                {t("sign_in")}
+              </Link>
+            </p>
+          ) : null}
+
+          {selected && session ? (
             <section className="panel">
               <h2>{t("redeem_title")}</h2>
               <p className="subtle" lang="bn">

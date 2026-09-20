@@ -15,10 +15,12 @@ import { createEdgeProxy } from "@bdpay/edge/edge-proxy";
 import { hasValidDinerSession } from "@/lib/mock/session";
 
 // --- per-app public allow-list ----------------------------------------------
-// The diner app's only public page is /login. Everything else requires a
-// session.
-const PUBLIC_EXACT = ["/login"];
-const PUBLIC_PREFIXES: string[] = [];
+// Browse (/) and merchant detail (/merchants/*) are public so diners can
+// discover deals before signing in. Login stays public; pay/history stay gated.
+// Public discovery (EatClub-style): browse + merchant detail before login.
+// Redemption still requires a session (API-enforced on reserve/pay).
+const PUBLIC_EXACT = ["/", "/login"];
+const PUBLIC_PREFIXES: string[] = ["/merchants"];
 
 export const proxy = createEdgeProxy({
   hasSession: (req: NextRequest) => hasValidDinerSession(req),

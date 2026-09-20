@@ -69,7 +69,12 @@ export interface DinerMerchant {
   cuisine_bn: string;
   live_offer_count: number;
   best_percent_bps: number | null;
+  /** EatClub-style time-window chips derived from live offer windows. */
+  window_tags: WindowTag[];
 }
+
+export type WindowTag = "lunch" | "early_bird" | "happy_hour" | "late";
+
 
 export type CheckoutMethod = "BANGLA_QR" | "BKASH" | "NAGAD";
 
