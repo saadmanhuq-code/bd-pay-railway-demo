@@ -11,6 +11,14 @@ import type {
   WindowTag,
 } from "@/lib/api/types";
 import { tagsForWindows } from "@/lib/demo/windowTags";
+import {
+  getOsmMerchant,
+  isOsmMerchantId,
+  listOsmMerchants,
+  listOsmOffers,
+  osmAreasForCity,
+  osmVenueCount,
+} from "@/lib/demo/osmCatalog";
 
 interface DemoOffer extends EligibleOffer {
   merchant_id: string;
@@ -587,6 +595,12 @@ export function isDemoMerchantId(merchantId: string): boolean {
   return merchantId.startsWith("demo_mrch_");
 }
 
+/** Local catalog row (hand-seeded demo or OSM cache). */
+export function isLocalCatalogMerchantId(merchantId: string): boolean {
+  return isDemoMerchantId(merchantId) || isOsmMerchantId(merchantId);
+}
+
+
 export function listDemoMerchants(params: {
   area?: string;
   q?: string;
@@ -600,33 +614,63 @@ export function listDemoMerchants(params: {
   const tag = params.windowTag ?? "";
   const city = params.city ?? "";
   const cuisine = params.cuisine ?? "";
-  return DEMO_MERCHANTS.filter((m) => {
-    if (city && (m.city ?? "Dhaka") !== city) return false;
-    if (area && m.area !== area) return false;
-    if (tag && !m.window_tags.includes(tag)) return false;
-    if (cuisine && !(m.cuisine_tags ?? []).includes(cuisine)) return false;
-    if (q) {
-      if (
-        !m.display_name.toLowerCase().includes(q) &&
-        !m.display_name_bn.includes(qRaw) &&
-        !m.area.toLowerCase().includes(q) &&
-        !m.area_bn.includes(qRaw) &&
-        !m.cuisine.toLowerCase().includes(q) &&
-        !m.cuisine_bn.includes(qRaw) &&
-        !(m.cuisine_tags ?? []).some((c) => c.toLowerCase().includes(q))
-      ) {
-        return false;
-      }
-    }
-    return true;
-  });
+
+  // Primary: OSM cache (when present). Fallback: hand-seeded demos only.
+  const pool =
+    osmVenueCount() > 0
+      ? [
+          ...DEMO_MERCHANTS.filter((m) => {
+            if (city && (m.city ?? "Dhaka") !== city) return false;
+            if (area && m.area !== area) return false;
+            if (tag && !m.window_tags.includes(tag)) return false;
+            if (cuisine && !(m.cuisine_tags ?? []).includes(cuisine)) return false;
+            if (q) {
+              if (
+                !m.display_name.toLowerCase().includes(q) &&
+                !m.display_name_bn.includes(qRaw) &&
+                !m.area.toLowerCase().includes(q) &&
+                !m.area_bn.includes(qRaw) &&
+                !m.cuisine.toLowerCase().includes(q) &&
+                !m.cuisine_bn.includes(qRaw) &&
+                !(m.cuisine_tags ?? []).some((c) => c.toLowerCase().includes(q))
+              ) {
+                return false;
+              }
+            }
+            return true;
+          }),
+          ...listOsmMerchants({ area, q: qRaw, windowTag: tag, city, cuisine }),
+        ]
+      : DEMO_MERCHANTS.filter((m) => {
+          if (city && (m.city ?? "Dhaka") !== city) return false;
+          if (area && m.area !== area) return false;
+          if (tag && !m.window_tags.includes(tag)) return false;
+          if (cuisine && !(m.cuisine_tags ?? []).includes(cuisine)) return false;
+          if (q) {
+            if (
+              !m.display_name.toLowerCase().includes(q) &&
+              !m.display_name_bn.includes(qRaw) &&
+              !m.area.toLowerCase().includes(q) &&
+              !m.area_bn.includes(qRaw) &&
+              !m.cuisine.toLowerCase().includes(q) &&
+              !m.cuisine_bn.includes(qRaw) &&
+              !(m.cuisine_tags ?? []).some((c) => c.toLowerCase().includes(q))
+            ) {
+              return false;
+            }
+          }
+          return true;
+        });
+  return pool;
 }
 
 export function getDemoMerchant(merchantId: string): DinerMerchant | null {
+  if (isOsmMerchantId(merchantId)) return getOsmMerchant(merchantId);
   return DEMO_MERCHANTS.find((m) => m.merchant_id === merchantId) ?? null;
 }
 
 export function listDemoOffers(merchantId: string): EligibleOffer[] {
+  if (isOsmMerchantId(merchantId)) return listOsmOffers(merchantId);
   return DEMO_OFFERS.filter((o) => o.merchant_id === merchantId).map((o) => {
     const { merchant_id: _mid, ...offer } = o;
     return offer;
@@ -634,10 +678,23 @@ export function listDemoOffers(merchantId: string): EligibleOffer[] {
 }
 
 export function areasForCity(city: string): Array<[string, string]> {
+  if (osmVenueCount() > 0) {
+    const osmAreas = osmAreasForCity(city);
+    const seen = new Map(osmAreas);
+    for (const m of DEMO_MERCHANTS) {
+      if ((m.city ?? "Dhaka") !== city) continue;
+      if (!seen.has(m.area)) seen.set(m.area, m.area_bn);
+    }
+    return [...seen.entries()].sort((a, b) => a[0].localeCompare(b[0]));
+  }
   const seen = new Map<string, string>();
   for (const m of DEMO_MERCHANTS) {
     if ((m.city ?? "Dhaka") !== city) continue;
     if (!seen.has(m.area)) seen.set(m.area, m.area_bn);
   }
   return [...seen.entries()];
+}
+
+export function catalogSourceLabel(): "osm" | "demo" {
+  return osmVenueCount() > 0 ? "osm" : "demo";
 }

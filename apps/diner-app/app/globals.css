@@ -885,3 +885,18 @@ h2 {
   font-size: 11px;
   font-weight: 600;
 }
+
+
+/* OSM attribution footer */
+.osm-attribution {
+  text-align: center;
+  font-size: 0.7rem;
+  color: var(--muted, #6b7280);
+  padding: 0.35rem 0.75rem 0.15rem;
+  margin-bottom: 0.25rem;
+}
+.osm-attribution a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}

@@ -5,13 +5,15 @@
 import { eligibleOffers, listDinerMerchants } from "@/lib/api/client";
 import type { CuisineTag, DinerMerchant, EligibleOffer, WindowTag } from "@/lib/api/types";
 import {
+  catalogSourceLabel,
   getDemoMerchant,
-  isDemoMerchantId,
+  isLocalCatalogMerchantId,
   listDemoMerchants,
   listDemoOffers,
 } from "@/lib/demo/catalog";
+import { isOsmMerchantId } from "@/lib/demo/osmCatalog";
 
-export type DiscoverSource = "api" | "demo";
+export type DiscoverSource = "api" | "demo" | "osm";
 
 export interface MerchantDiscoverResult {
   merchants: DinerMerchant[];
@@ -48,24 +50,25 @@ export async function discoverMerchants(params: {
   } catch {
     // fall through to demo
   }
+  const merchants = listDemoMerchants({
+    area: params.area,
+    q: params.q,
+    windowTag: tag,
+    city,
+    cuisine,
+  });
   return {
-    merchants: listDemoMerchants({
-      area: params.area,
-      q: params.q,
-      windowTag: tag,
-      city,
-      cuisine,
-    }),
-    source: "demo",
+    merchants,
+    source: catalogSourceLabel(),
   };
 }
 
 export async function discoverMerchantOffers(merchantId: string): Promise<OfferDiscoverResult> {
-  if (isDemoMerchantId(merchantId)) {
+  if (isLocalCatalogMerchantId(merchantId)) {
     return {
       merchant: getDemoMerchant(merchantId),
       offers: listDemoOffers(merchantId),
-      source: "demo",
+      source: isOsmMerchantId(merchantId) ? "osm" : "demo",
     };
   }
   try {
@@ -82,9 +85,13 @@ export async function discoverMerchantOffers(merchantId: string): Promise<OfferD
   } catch {
     // fall through
   }
-  const demoMerchant = getDemoMerchant(merchantId);
-  if (demoMerchant) {
-    return { merchant: demoMerchant, offers: listDemoOffers(merchantId), source: "demo" };
+  const localMerchant = getDemoMerchant(merchantId);
+  if (localMerchant) {
+    return {
+      merchant: localMerchant,
+      offers: listDemoOffers(merchantId),
+      source: isOsmMerchantId(merchantId) ? "osm" : "demo",
+    };
   }
-  return { merchant: null, offers: [], source: "demo" };
+  return { merchant: null, offers: [], source: catalogSourceLabel() };
 }

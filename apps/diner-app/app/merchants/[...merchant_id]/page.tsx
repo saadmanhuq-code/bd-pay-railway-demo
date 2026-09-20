@@ -53,8 +53,12 @@ export default function MerchantOffersPage() {
   const { session, loading } = useSession(false);
   const { lang, t } = useLang();
   const geo = useGeolocation();
-  const params = useParams<{ merchant_id: string }>();
-  const merchantId = typeof params.merchant_id === "string" ? params.merchant_id : "";
+  const params = useParams<{ merchant_id: string | string[] }>();
+  const merchantId = Array.isArray(params.merchant_id)
+    ? params.merchant_id.join("/")
+    : typeof params.merchant_id === "string"
+      ? params.merchant_id
+      : "";
 
   const [merchant, setMerchant] = useState<DinerMerchant | null>(null);
   const [offers, setOffers] = useState<EligibleOffer[] | null>(null);
@@ -72,7 +76,7 @@ export default function MerchantOffersPage() {
 
   const [demoAmountRaw, setDemoAmountRaw] = useState("");
   const [demoSuccess, setDemoSuccess] = useState<DinerPayResult | null>(null);
-  const [source, setSource] = useState<"api" | "demo">("api");
+  const [source, setSource] = useState<"api" | "demo" | "osm">("api");
 
   const load = useCallback(() => {
     if (merchantId === "") {
@@ -214,7 +218,11 @@ export default function MerchantOffersPage() {
 
   return (
     <Shell session={session}>
-      {source === "demo" ? (
+      {source === "osm" ? (
+        <p className="notice demo-banner" role="status">
+          {t("osm_catalog_banner")}
+        </p>
+      ) : source === "demo" ? (
         <p className="notice demo-banner" role="status">
           {t("demo_catalog_banner")}
         </p>

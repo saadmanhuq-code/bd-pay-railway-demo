@@ -311,6 +311,18 @@ export const COPY = {
     en: "Demo catalog (simulator) — sample Dhaka restaurants for discovery. Not live bank data.",
     bn: "ডেমো ক্যাটালগ (সিমুলেটর) — ডিসকভারির জন্য নমুনা ঢাকা রেস্তোরাঁ। লাইভ ব্যাংক ডেটা নয়।",
   },
+  osm_catalog_banner: {
+    en: "Public catalog from OpenStreetMap (Dhaka). Offer % chips are demo terms — not live bank offers.",
+    bn: "ওপেনস্ট্রিটম্যাপ থেকে পাবলিক ক্যাটালগ (ঢাকা)। অফার %-চিপগুলো ডেমো শর্ত — লাইভ ব্যাংক অফার নয়।",
+  },
+  osm_attribution: {
+    en: "Map data © OpenStreetMap",
+    bn: "ম্যাপ ডেটা © OpenStreetMap",
+  },
+  osm_attribution_note: {
+    en: "Restaurant listings © OpenStreetMap contributors (ODbL).",
+    bn: "রেস্তোরাঁ তালিকা © OpenStreetMap অবদানকারী (ODbL)।",
+  },
   sign_in: { en: "Sign in", bn: "সাইন ইন" },
   sign_in_to_redeem: {
     en: "Sign in to redeem",

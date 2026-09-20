@@ -6,7 +6,8 @@
     "prebuild": "node scripts/no-write-guard.mjs && node scripts/check-bn-corpus.mjs",
     "build": "next build",
     "pretest": "tsc -p tsconfig.test.json && node -e \"require('node:fs').writeFileSync('.test-dist/package.json', JSON.stringify({ type: 'module' }))\"",
-    "test": "node --test tests/unit/*.test.mjs"
+    "test": "node --test tests/unit/*.test.mjs",
+    "fetch-osm": "node scripts/fetch-osm-dhaka.mjs"
   },
   "dependencies": {
     "leaflet": "^1.9.4",

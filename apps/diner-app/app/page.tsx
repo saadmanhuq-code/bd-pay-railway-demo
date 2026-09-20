@@ -142,7 +142,11 @@ export default function BrowsePage() {
         ) : null}
       </section>
 
-      {source === "demo" ? (
+      {source === "osm" ? (
+        <p className="notice demo-banner" role="status">
+          {t("osm_catalog_banner")}
+        </p>
+      ) : source === "demo" ? (
         <p className="notice demo-banner" role="status">
           {t("demo_catalog_banner")}
         </p>

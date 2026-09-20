@@ -65,6 +65,15 @@ export function Shell({
         </div>
       </header>
       <main className="content">{children}</main>
+      <footer className="osm-attribution" role="contentinfo">
+        <a
+          href="https://www.openstreetmap.org/copyright"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          {t("osm_attribution")}
+        </a>
+      </footer>
       <nav className="bottom-nav" aria-label="main">
         <Link href="/" className={`bottom-link ${browseActive ? "active" : ""}`}>
           {t("nav_browse")}
