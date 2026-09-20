@@ -1,0 +1,10 @@
+NotoSansBengali-Regular.ttf
+NotoSans-Regular.ttf
+Copyright 2010,2012-2020 Google Inc. / Google LLC.
+
+This Font Software is licensed under the SIL Open Font License, Version 1.1.
+https://scripts.sil.org/OFL
+
+Vendored from Debian package fonts-noto-core so the spec/13 kit.pdf render is
+byte-identical across hosts (deterministic-render contract) regardless of the
+host's installed fonts.

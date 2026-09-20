@@ -1,0 +1,4 @@
+segno
+pillow
+fpdf2
+uharfbuzz

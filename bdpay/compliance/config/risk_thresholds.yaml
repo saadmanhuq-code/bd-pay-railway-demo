@@ -1,0 +1,59 @@
+# compliance/config/risk_thresholds.yaml
+# CAMLCO-approved threshold artifact (spec/06 Risk Scoring Engine section).
+# Changes require ApprovalRequest (four-eyes). Version must be incremented
+# on any change; the active version is recorded on every screening row and
+# every risk-score row for audit replay.
+thresholds_version: "thresholds_v1"
+effective_from: "2026-06-11"
+
+risk_tiers:
+  HIGH:
+    score_min: 70          # inclusive
+    score_max: 100
+    review_period_days: 365
+  MEDIUM:
+    score_min: 40          # inclusive
+    score_max: 69
+    review_period_days: 730
+  LOW:
+    score_min: 0           # inclusive
+    score_max: 39
+    review_period_days: 1825
+
+velocity_rules:
+  VELOCITY_24H_COUNT_THRESHOLD: 30       # transactions
+  VELOCITY_24H_AMOUNT_THRESHOLD_MINOR: 5000000000  # BDT 50 lakh = 5,000,000,000 paisa
+
+structuring:
+  STRUCTURING_WINDOW_HOURS: 72
+  STRUCTURING_MIN_TXN_COUNT: 3
+  STRUCTURING_AGGREGATE_THRESHOLD_MINOR: 100000000  # BDT 10 lakh
+
+mule_detection:
+  MULE_FAN_IN_SENDER_COUNT: 10
+  MULE_FORWARD_WINDOW_SECONDS: 3600      # 1 hour
+  MULE_FAN_OUT_RECIPIENT_COUNT: 3
+
+dormancy:
+  DORMANCY_DAYS: 180                     # account quiet > 6 months
+  DORMANCY_SPIKE_TXN_COUNT_24H: 5        # then sudden activity spike
+
+ctr:
+  CTR_THRESHOLD_MINOR: 100000000         # BDT 10 lakh = 100,000,000 paisa; config-gated per PSO draft
+
+str_retry:
+  MAX_STR_RETRY: 20
+  STR_RETRY_INITIAL_DELAY_SECONDS: 30
+  STR_RETRY_MAX_DELAY_SECONDS: 14400     # 4 hours
+
+str_filing_clock:
+  STR_FILING_CLOCK_HOURS: 24             # filing clock tracked from the CAMLCO decision
+
+alert_escalation:
+  RAISED_ESCALATION_HOURS: 24
+  TRIAGING_ESCALATION_HOURS: 72
+  STR_CAMLCO_REVIEW_HOURS: 2
+
+sanctions_matching:
+  T_HIT: "0.90"                          # score >= T_HIT (or identifier exact) => HIT
+  T_REVIEW: "0.82"                       # T_REVIEW <= score < T_HIT => POTENTIAL_MATCH

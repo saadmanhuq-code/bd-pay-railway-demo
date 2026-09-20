@@ -1,0 +1,3 @@
+defusedxml>=0.7
+lxml>=5.0
+yubihsm>=3.0

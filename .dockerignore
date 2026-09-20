@@ -1,0 +1,29 @@
+# Build context allowlist posture: the image needs ONLY pyproject.toml,
+# bdpay/, db/migrations/, and docker/. Everything else stays out of the
+# context (smaller, faster, and no chance of a stray local file or secret
+# landing in a layer).
+
+.git
+.venv
+**/__pycache__
+*.pyc
+.pytest_*
+*.egg-info
+
+# Source trees not part of the Python deployable
+apps/
+arch/
+docs/
+research/
+spec/
+scripts/
+tests/
+monitoring/
+
+# Docs / mission files at repo root
+*.md
+
+# Dev-only stack + lockfiles not used by pip install
+docker-compose.dev.yml
+docker-compose.prod.yml
+uv.lock
