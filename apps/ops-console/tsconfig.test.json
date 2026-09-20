@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "lib": ["es2022"],
+    "target": "es2022",
+    "module": "es2022",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "skipLibCheck": true,
+    "declaration": false,
+    "types": ["node"],
+    "rootDir": "src",
+    "outDir": ".test-dist"
+  },
+  "files": ["src/lib/format.ts", "src/lib/mock/detHex.ts"]
+}

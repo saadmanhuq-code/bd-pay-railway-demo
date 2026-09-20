@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "lib": ["es2022", "dom"],
+    "target": "es2022",
+    "module": "es2022",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "skipLibCheck": true,
+    "declaration": false,
+    "types": ["node"],
+    "rootDir": "src",
+    "outDir": ".test-dist"
+  },
+  "files": [
+    "src/env-flag.ts",
+    "src/live-proxy-core.ts",
+    "src/edge-proxy-core.ts",
+    "src/mock/signed-session.ts",
+    "src/mock/totp.ts"
+  ]
+}

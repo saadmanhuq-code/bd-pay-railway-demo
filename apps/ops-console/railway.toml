@@ -1,0 +1,10 @@
+# Railway service: set Root Directory to apps/ops-console
+[build]
+builder = "NIXPACKS"
+buildCommand = "cd ../.. && npm ci --ignore-scripts && npm install --ignore-scripts --workspace=packages/edge && cd apps/ops-console && npx next build"
+
+[deploy]
+startCommand = "npx next start -p $PORT"
+healthcheckPath = "/login"
+healthcheckTimeout = 120
+restartPolicyType = "ON_FAILURE"

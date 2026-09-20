@@ -1,0 +1,36 @@
+// SEC-03 edge auth + Content-Security-Policy proxy (ops-console).
+//
+// The CSP + fail-closed auth machinery is shared (@bdpay/edge/edge-proxy —
+// see its own header comment for the two jobs it does). This file is only
+// what is genuinely per-app: WHICH pages are public, and how a session is
+// verified.
+//
+// SESSION MODEL (mirrors app/api/mock/[...path]/route.ts): the ops-console
+// session cookie is an HMAC-signed, expiring mock operator session token.
+// The API is the source of truth for minting the token; this edge check
+// verifies the same signature + expiry before any protected page renders.
+
+import type { NextRequest } from "next/server";
+import { createEdgeProxy } from "@bdpay/edge/edge-proxy";
+import { hasValidOpsSession } from "@/lib/mock/session";
+
+// --- per-app public allow-list ----------------------------------------------
+// The ops console is the strict admin surface: the ONLY public page is
+// /login. Everything else requires a session.
+const PUBLIC_EXACT = ["/login"];
+const PUBLIC_PREFIXES: string[] = [];
+
+export const proxy = createEdgeProxy({
+  hasSession: (req: NextRequest) => hasValidOpsSession(req),
+  publicExact: PUBLIC_EXACT,
+  publicPrefixes: PUBLIC_PREFIXES,
+});
+
+// This matcher MUST equal @bdpay/edge/edge-proxy's EDGE_PROXY_MATCHER
+// exactly. It is written out as a literal string here — not imported —
+// because Next parses `config.matcher` statically at build time and cannot
+// resolve a value coming from an import; see EDGE_PROXY_MATCHER's own
+// comment in the package for what each exclusion token does and why.
+export const config = {
+  matcher: ["/((?!api/|_next/|favicon.ico|.well-known/).*)"],
+};

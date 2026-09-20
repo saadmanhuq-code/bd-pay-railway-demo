@@ -1,0 +1,13 @@
+# Hash-pinned / byte-identity official fixtures.
+#
+# These artifacts are pinned by SHA-256 in the test suites
+# (tests/compliance/test_goaml_schema.py, tests/connectors/rails/
+# test_rtgs_official_xsd.py, tests/qr/test_official_vectors.py).
+# With core.autocrlf=true on Windows, git rewrites line endings on
+# checkout, which breaks byte-identity / sha256 assertions. Treat them
+# as binary (-text) so git NEVER touches their bytes on any platform.
+
+tests/fixtures/official/** -text
+
+# Defensive: any extracted-markdown fixture is a byte-pinned artifact.
+*.extracted.md -text

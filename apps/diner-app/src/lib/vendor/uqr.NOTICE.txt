@@ -1,0 +1,2 @@
+uqr v0.1.2 — MIT License — https://github.com/unjs/uqr
+Vendored for diner mock QR render (BP-19). Do not edit.

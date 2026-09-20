@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "lib": ["es2022", "dom", "dom.iterable"],
+    "target": "es2022",
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "skipLibCheck": true,
+    "isolatedModules": true,
+    "jsx": "react-jsx",
+    "noEmit": true,
+    "types": ["node"]
+  },
+  // .tsx files are included too: since lane 349 no module in this package imports an app path
+  // alias (TotpModal is a factory fed with the app's DualLabel and useLang), so tsc checks them
+  // here as well as inside each app's `next build`. next/server resolves from the root node_modules.
+  "include": ["src/**/*.ts", "src/**/*.tsx"]
+}

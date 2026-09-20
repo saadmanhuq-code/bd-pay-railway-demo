@@ -1,0 +1,79 @@
+{
+  "name": "@bdpay/edge",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./live-proxy-core": {
+      "types": "./src/live-proxy-core.ts",
+      "default": "./src/live-proxy-core.ts"
+    },
+    "./live-proxy": {
+      "types": "./src/live-proxy.ts",
+      "default": "./src/live-proxy.ts"
+    },
+    "./edge-proxy-core": {
+      "types": "./src/edge-proxy-core.ts",
+      "default": "./src/edge-proxy-core.ts"
+    },
+    "./edge-proxy": {
+      "types": "./src/edge-proxy.ts",
+      "default": "./src/edge-proxy.ts"
+    },
+    "./security-headers": {
+      "types": "./src/security-headers.mjs",
+      "default": "./src/security-headers.mjs"
+    },
+    "./env-flag": {
+      "types": "./src/env-flag.ts",
+      "default": "./src/env-flag.ts"
+    },
+    "./mock/signed-session": {
+      "types": "./src/mock/signed-session.ts",
+      "default": "./src/mock/signed-session.ts"
+    },
+    "./mock/guard": {
+      "types": "./src/mock/guard.ts",
+      "default": "./src/mock/guard.ts"
+    },
+    "./mock/totp": {
+      "types": "./src/mock/totp.ts",
+      "default": "./src/mock/totp.ts"
+    },
+    "./ui/DataTable": {
+      "types": "./src/ui/DataTable.tsx",
+      "default": "./src/ui/DataTable.tsx"
+    },
+    "./ui/TotpModal": {
+      "types": "./src/ui/TotpModal.tsx",
+      "default": "./src/ui/TotpModal.tsx"
+    },
+    "./use-session": {
+      "types": "./src/use-session.ts",
+      "default": "./src/use-session.ts"
+    },
+    "./i18n/lang-context": {
+      "types": "./src/i18n/lang-context.tsx",
+      "default": "./src/i18n/lang-context.tsx"
+    },
+    "./i18n/DualLabel": {
+      "types": "./src/i18n/DualLabel.tsx",
+      "default": "./src/i18n/DualLabel.tsx"
+    }
+  },
+  "scripts": {
+    "pretest": "tsc -p tsconfig.test.json && node -e \"require('node:fs').writeFileSync('.test-dist/package.json', JSON.stringify({ type: 'module' }))\"",
+    "test": "node --test tests/unit/*.test.mjs"
+  },
+  "peerDependencies": {
+    "next": ">=16 <17",
+    "react": ">=18 <19",
+    "react-dom": ">=18 <19"
+  },
+  "devDependencies": {
+    "@types/node": "22.10.10",
+    "@types/react": "18.3.18",
+    "@types/react-dom": "18.3.5",
+    "typescript": "5.7.3"
+  }
+}

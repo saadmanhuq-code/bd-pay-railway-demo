@@ -1,0 +1,22 @@
+{
+  "name": "bdpay-ops-console",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "prebuild": "node scripts/no-write-guard.mjs",
+    "build": "next build",
+    "pretest": "tsc -p tsconfig.test.json && node -e \"require('node:fs').writeFileSync('.test-dist/package.json', JSON.stringify({ type: 'module' }))\"",
+    "test": "node --test tests/unit/*.test.mjs"
+  },
+  "dependencies": {
+    "next": "16.3.4",
+    "react": "18.3.1",
+    "react-dom": "18.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "22.10.10",
+    "@types/react": "18.3.18",
+    "@types/react-dom": "18.3.5",
+    "typescript": "5.7.3"
+  }
+}

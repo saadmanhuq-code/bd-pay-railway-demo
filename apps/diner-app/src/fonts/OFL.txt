@@ -1,0 +1,2 @@
+Noto Sans Bengali — SIL Open Font License 1.1
+Source: https://github.com/google/fonts (ofl/notosansbengali)

@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "lib": ["es2022"],
+    "target": "es2022",
+    "module": "es2022",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "skipLibCheck": true,
+    "declaration": false,
+    "types": ["node"],
+    "rootDir": "src",
+    "outDir": ".test-dist"
+  },
+  "files": [
+    "src/lib/api/live-key-management-guard.ts",
+    "src/lib/api/live-merchant-login.ts"
+  ]
+}

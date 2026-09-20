@@ -1,0 +1,28 @@
+__pycache__/
+*.pyc
+.venv/
+.env
+*.env
+node_modules/
+.pytest_cache/
+.next/
+dist/
+build/
+*.egg-info/
+.mypy_cache/
+.ruff_cache/
+.hypothesis/
+.pytest_tmp*/
+.pytest_report.json
+
+# F01 durable checkpoint-trust custody (holds a private Ed25519 seed).
+# Runtime state; never committed.
+var/
+
+# lane/332: TS test-compile output and npm workspace build artifacts. Some
+# per-app dirs also carry their own .gitignore with these same entries; this
+# root one is the safety net (e.g. apps/ops-console had none and was leaking
+# .test-dist/tsconfig.tsbuildinfo into git status before this lane).
+.test-dist/
+tsconfig.tsbuildinfo
+.npm/

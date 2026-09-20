@@ -1,0 +1,11 @@
+{
+  "name": "bd-pay",
+  "private": true,
+  "dependencies": {
+    "@saadmanhuq-code/integrity-guards": "file:./vendor/integrity-guards-0.2.2.tgz"
+  },
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ]
+}
