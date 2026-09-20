@@ -71,9 +71,51 @@ export interface DinerMerchant {
   best_percent_bps: number | null;
   /** EatClub-style time-window chips derived from live offer windows. */
   window_tags: WindowTag[];
+  /** Demo / discovery extras (optional on live API rows). */
+  city?: string;
+  city_bn?: string;
+  lat?: number;
+  lng?: number;
+  /** First-class cuisine filter tags (e.g. Biryani, Cafe). */
+  cuisine_tags?: CuisineTag[];
+  photo_urls?: string[];
+  rating_avg?: number;
+  rating_count?: number;
+  menu_sections?: MenuSection[];
+  reviews?: MerchantReview[];
 }
 
 export type WindowTag = "lunch" | "early_bird" | "happy_hour" | "late";
+
+export type CuisineTag =
+  | "Bangladeshi"
+  | "Biryani"
+  | "Cafe"
+  | "Chinese"
+  | "Thai"
+  | "Burgers"
+  | "Pizza"
+  | "Kabab";
+
+export interface MenuItem {
+  name: string;
+  name_bn: string;
+  price_minor: number;
+}
+
+export interface MenuSection {
+  title: string;
+  title_bn: string;
+  items: MenuItem[];
+}
+
+export interface MerchantReview {
+  author: string;
+  author_bn: string;
+  stars: number;
+  text: string;
+  text_bn: string;
+}
 
 
 export type CheckoutMethod = "BANGLA_QR" | "BKASH" | "NAGAD";

@@ -3,7 +3,7 @@
 // demo catalog so unauthenticated browse still works for demos.
 
 import { eligibleOffers, listDinerMerchants } from "@/lib/api/client";
-import type { DinerMerchant, EligibleOffer, WindowTag } from "@/lib/api/types";
+import type { CuisineTag, DinerMerchant, EligibleOffer, WindowTag } from "@/lib/api/types";
 import {
   getDemoMerchant,
   isDemoMerchantId,
@@ -32,12 +32,18 @@ export async function discoverMerchants(params: {
   area?: string;
   q?: string;
   windowTag?: WindowTag | "";
+  city?: string;
+  cuisine?: CuisineTag | "";
 }): Promise<MerchantDiscoverResult> {
   const tag = params.windowTag ?? "";
+  const cuisine = params.cuisine ?? "";
+  const city = params.city ?? "";
   try {
     const page = await listDinerMerchants({ area: params.area, q: params.q });
     let rows = (page.data ?? []).map(withTags);
     if (tag) rows = rows.filter((m) => m.window_tags.includes(tag));
+    if (city) rows = rows.filter((m) => (m.city ?? "Dhaka") === city);
+    if (cuisine) rows = rows.filter((m) => (m.cuisine_tags ?? []).includes(cuisine));
     if (rows.length > 0) return { merchants: rows, source: "api" };
   } catch {
     // fall through to demo
@@ -47,6 +53,8 @@ export async function discoverMerchants(params: {
       area: params.area,
       q: params.q,
       windowTag: tag,
+      city,
+      cuisine,
     }),
     source: "demo",
   };

@@ -68,7 +68,8 @@ export function buildCsp(nonce: string, apiBase: string | undefined = process.en
     "default-src 'self'",
     `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'`,
     "style-src 'self' 'unsafe-inline'",
-    "img-src 'self' data: blob:",
+    // OSM tiles (Leaflet) + picsum demo venue photos — no paid map APIs.
+    "img-src 'self' data: blob: https://tile.openstreetmap.org https://*.tile.openstreetmap.org https://picsum.photos https://fastly.picsum.photos",
     "font-src 'self'",
     connectSrc,
     "object-src 'none'",

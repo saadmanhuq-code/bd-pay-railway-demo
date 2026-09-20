@@ -31,6 +31,7 @@ export function Shell({
 
   const browseActive = pathname === "/" || pathname.startsWith("/merchants");
   const historyActive = pathname === "/history";
+  const cardActive = pathname === "/wallet" || pathname.startsWith("/wallet");
   const loginNext = pathname.startsWith("/merchants")
     ? `/login?next=${encodeURIComponent(pathname)}`
     : "/login?next=/";
@@ -69,12 +70,20 @@ export function Shell({
           {t("nav_browse")}
         </Link>
         {session ? (
-          <Link
-            href="/history"
-            className={`bottom-link ${historyActive ? "active" : ""}`}
-          >
-            {t("nav_history")}
-          </Link>
+          <>
+            <Link
+              href="/wallet"
+              className={`bottom-link ${cardActive ? "active" : ""}`}
+            >
+              {t("nav_card")}
+            </Link>
+            <Link
+              href="/history"
+              className={`bottom-link ${historyActive ? "active" : ""}`}
+            >
+              {t("nav_history")}
+            </Link>
+          </>
         ) : (
           <Link href={loginNext} className="bottom-link">
             {t("sign_in")}

@@ -23,7 +23,7 @@ export const SECURITY_HEADERS = [
   // Send only the origin on cross-origin navigation; full URL same-origin.
   { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
   // Lock down powerful browser features this app does not use.
-  { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(), payment=()" },
+  { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(self), payment=()" },
 ];
 
 /** The single `headers()` route entry every app's next.config.mjs returns. */

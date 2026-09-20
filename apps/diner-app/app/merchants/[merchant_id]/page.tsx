@@ -34,7 +34,10 @@ import { DualLabel } from "@/lib/i18n/DualLabel";
 import { REASON_COPY, REFUSAL_COPY, type CopyKey } from "@/lib/i18n/copy";
 import { Shell } from "@/components/Shell";
 import { QrCode } from "@/components/QrCode";
+import { MerchantMap } from "@/components/MerchantMap";
 import { discoverMerchantOffers } from "@/lib/demo/discover";
+import { formatDistanceKm, haversineKm } from "@/lib/demo/geo";
+import { useGeolocation } from "@/lib/useGeolocation";
 
 const METHOD_KEYS: Record<CheckoutMethod, CopyKey> = {
   BANGLA_QR: "method_BANGLA_QR",
@@ -49,6 +52,7 @@ function money(lang: "bn" | "en", minor: number): string {
 export default function MerchantOffersPage() {
   const { session, loading } = useSession(false);
   const { lang, t } = useLang();
+  const geo = useGeolocation();
   const params = useParams<{ merchant_id: string }>();
   const merchantId = typeof params.merchant_id === "string" ? params.merchant_id : "";
 
@@ -223,7 +227,84 @@ export default function MerchantOffersPage() {
             {lang === "bn"
               ? `${merchant.area_bn} · ${merchant.cuisine_bn}`
               : `${merchant.area} · ${merchant.cuisine}`}
+            {geo.position && merchant.lat != null && merchant.lng != null
+              ? ` · ${formatDistanceKm(
+                  haversineKm(geo.position, { lat: merchant.lat, lng: merchant.lng }),
+                  lang,
+                )} ${t("distance_away")}`
+              : null}
           </p>
+          {merchant.rating_avg != null ? (
+            <p className="subtle">
+              ★ {merchant.rating_avg.toFixed(1)} · {merchant.rating_count ?? 0}{" "}
+              {t("rating_label")}
+            </p>
+          ) : null}
+
+          {(merchant.photo_urls ?? []).length > 0 ? (
+            <section className="venue-photos" aria-label={t("photos_title")}>
+              <h2 className="venue-section-title">{t("photos_title")}</h2>
+              <div className="photo-strip">
+                {(merchant.photo_urls ?? []).map((url) => (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img key={url} src={url} alt="" className="venue-photo" loading="lazy" />
+                ))}
+              </div>
+            </section>
+          ) : null}
+
+          {merchant.lat != null && merchant.lng != null ? (
+            <section className="panel venue-map-panel">
+              <h2 className="venue-section-title">{t("map_title")}</h2>
+              <MerchantMap
+                lat={merchant.lat}
+                lng={merchant.lng}
+                label={lang === "bn" ? merchant.display_name_bn : merchant.display_name}
+              />
+              {!geo.position ? (
+                <button type="button" className="btn btn-block" onClick={() => geo.request()}>
+                  {geo.status === "prompting" ? t("near_me_locating") : t("near_me")}
+                </button>
+              ) : null}
+            </section>
+          ) : null}
+
+          {(merchant.menu_sections ?? []).length > 0 ? (
+            <section className="panel">
+              <h2 className="venue-section-title">{t("menu_title")}</h2>
+              {(merchant.menu_sections ?? []).map((section) => (
+                <div key={section.title} className="menu-section">
+                  <h3 className="menu-section-title">
+                    {lang === "bn" ? section.title_bn : section.title}
+                  </h3>
+                  <ul className="menu-list">
+                    {section.items.map((item) => (
+                      <li key={item.name} className="menu-item">
+                        <span>{lang === "bn" ? item.name_bn : item.name}</span>
+                        <span className="menu-price">{money(lang, item.price_minor)}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </section>
+          ) : null}
+
+          {(merchant.reviews ?? []).length > 0 ? (
+            <section className="panel">
+              <h2 className="venue-section-title">{t("reviews_title")}</h2>
+              <p className="subtle">{t("reviews_demo_note")}</p>
+              {(merchant.reviews ?? []).map((r, i) => (
+                <blockquote key={i} className="review-card">
+                  <div className="review-head">
+                    <strong>{lang === "bn" ? r.author_bn : r.author}</strong>
+                    <span className="review-stars">{"★".repeat(r.stars)}{"☆".repeat(5 - r.stars)}</span>
+                  </div>
+                  <p>{lang === "bn" ? r.text_bn : r.text}</p>
+                </blockquote>
+              ))}
+            </section>
+          ) : null}
         </>
       ) : null}
 
@@ -355,9 +436,17 @@ export default function MerchantOffersPage() {
                   </span>
                 </div>
                 {session ? (
-                  <button className="btn btn-primary btn-block" onClick={() => selectOffer(offer)}>
-                    {t("offer_select")}
-                  </button>
+                  <>
+                    <button className="btn btn-primary btn-block" onClick={() => selectOffer(offer)}>
+                      {t("offer_select")}
+                    </button>
+                    <Link
+                      className="btn btn-block"
+                      href={`/wallet?merchant_id=${encodeURIComponent(merchantId)}&offer_id=${encodeURIComponent(offer.offer_id)}`}
+                    >
+                      {t("wallet_add")}
+                    </Link>
+                  </>
                 ) : (
                   <Link
                     className="btn btn-primary btn-block"

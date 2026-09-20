@@ -322,6 +322,78 @@ export const COPY = {
   },
   browse_results: { en: "restaurants", bn: "টি রেস্তোরাঁ" },
 
+  // -- location / city / cuisine / maps --------------------------------------
+  near_me: { en: "Near me", bn: "আমার কাছে" },
+  near_me_locating: { en: "Finding your location…", bn: "আপনার অবস্থান খোঁজা হচ্ছে…" },
+  near_me_denied: {
+    en: "Location permission denied — browse still works; distances hidden.",
+    bn: "লোকেশন অনুমতি দেওয়া হয়নি — ব্রাউজ চলবে; দূরত্ব দেখানো হবে না।",
+  },
+  near_me_unavailable: {
+    en: "Location unavailable on this device — browse without distances.",
+    bn: "এই ডিভাইসে লোকেশন পাওয়া যায়নি — দূরত্ব ছাড়াই ব্রাউজ করুন।",
+  },
+  distance_away: { en: "away", bn: "দূরে" },
+  city_label: { en: "City", bn: "শহর" },
+  city_stub_empty: {
+    en: "No demo restaurants in this city yet — try Dhaka.",
+    bn: "এই শহরে এখনও ডেমো রেস্তোরাঁ নেই — ঢাকা দেখুন।",
+  },
+  neighborhood_all: { en: "All neighborhoods", bn: "সব পাড়া" },
+  cuisine_all: { en: "All cuisines", bn: "সব রান্না" },
+  cuisine_Bangladeshi: { en: "Bangladeshi", bn: "বাংলাদেশি" },
+  cuisine_Biryani: { en: "Biryani", bn: "বিরিয়ানি" },
+  cuisine_Cafe: { en: "Cafe", bn: "ক্যাফে" },
+  cuisine_Chinese: { en: "Chinese", bn: "চাইনিজ" },
+  cuisine_Thai: { en: "Thai", bn: "থাই" },
+  cuisine_Burgers: { en: "Burgers", bn: "বার্গার" },
+  cuisine_Pizza: { en: "Pizza", bn: "পিৎজা" },
+  cuisine_Kabab: { en: "Kabab", bn: "কাবাব" },
+  map_show: { en: "Show on map", bn: "ম্যাপে দেখুন" },
+  map_title: { en: "Location", bn: "অবস্থান" },
+  photos_title: { en: "Photos (demo)", bn: "ছবি (ডেমো)" },
+  menu_title: { en: "Sample menu (demo)", bn: "নমুনা মেনু (ডেমো)" },
+  reviews_title: { en: "Reviews (demo)", bn: "রিভিউ (ডেমো)" },
+  reviews_demo_note: {
+    en: "Sample ratings for the dining-deals walkthrough — not live user reviews.",
+    bn: "ডাইনিং-ডিল ওয়াকথ্রু-এর নমুনা রেটিং — লাইভ ইউজার রিভিউ নয়।",
+  },
+  rating_label: { en: "rating", bn: "রেটিং" },
+
+  // -- diner card / tap-to-pay simulator -------------------------------------
+  nav_card: { en: "Diner Card", bn: "ডাইনার কার্ড" },
+  wallet_title: { en: "BD-Pay Diner Card", bn: "বিডি-পে ডাইনার কার্ড" },
+  wallet_add: { en: "Add to BD-Pay Diner Card", bn: "বিডি-পে ডাইনার কার্ডে যোগ করুন" },
+  wallet_subtitle: {
+    en: "Simulated digital card for demo tap-to-pay. Not a licensed Mastercard issuer.",
+    bn: "ডেমো ট্যাপ-টু-পে-এর সিমুলেটেড ডিজিটাল কার্ড। লাইসেন্সপ্রাপ্ত মাস্টারকার্ড ইস্যুয়ার নয়।",
+  },
+  wallet_disclaimer: {
+    en: "Demo only — not live Apple Pay / Google Wallet, and not real bank rails.",
+    bn: "শুধু ডেমো — লাইভ অ্যাপল পে / গুগল ওয়ালেট নয়, এবং আসল ব্যাংক রেলও নয়।",
+  },
+  wallet_add_apple: { en: "Add to Apple Wallet (demo)", bn: "অ্যাপল ওয়ালেটে যোগ (ডেমো)" },
+  wallet_add_google: { en: "Add to Google Wallet (demo)", bn: "গুগল ওয়ালেটে যোগ (ডেমো)" },
+  wallet_wallet_toast: {
+    en: "Demo button only — no wallet pass is created.",
+    bn: "শুধু ডেমো বাটন — কোনো ওয়ালেট পাস তৈরি হয় না।",
+  },
+  wallet_card_holder: { en: "Cardholder", bn: "কার্ডধারী" },
+  wallet_card_network: { en: "Simulated · BD-PAY", bn: "সিমুলেটেড · বিডি-পে" },
+  wallet_tap_title: { en: "Tap to pay (simulator)", bn: "ট্যাপ করে পেমেন্ট (সিমুলেটর)" },
+  wallet_tap_hold: { en: "Hold near terminal", bn: "টার্মিনালের কাছে ধরে রাখুন" },
+  wallet_tap_holding: { en: "Reading terminal…", bn: "টার্মিনাল পড়া হচ্ছে…" },
+  wallet_tap_success: {
+    en: "Tap successful — offer discount applied via simulator.",
+    bn: "ট্যাপ সফল — সিমুলেটরে অফার ছাড় প্রয়োগ হয়েছে।",
+  },
+  wallet_tap_need_merchant: {
+    en: "Open a restaurant offer first, then return here to simulate tap-to-pay.",
+    bn: "আগে একটি রেস্তোরাঁর অফার খুলুন, তারপর ট্যাপ-টু-পে সিমুলেট করতে এখানে ফিরে আসুন।",
+  },
+  wallet_pick_offer: { en: "Paying at", bn: "পেমেন্ট করছেন" },
+  sort_nearby: { en: "Sorted by distance", bn: "দূরত্ব অনুসারে সাজানো" },
+
 } as const;
 
 export type CopyKey = keyof typeof COPY;

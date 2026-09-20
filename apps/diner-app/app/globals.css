@@ -611,3 +611,277 @@ h2 {
   text-align: center;
   min-width: 64px;
 }
+
+/* --- EatClub gaps: location / cuisine / venue / wallet ------------------- */
+
+.filter-block {
+  margin-top: 4px;
+}
+
+.filter-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted);
+  margin-bottom: 2px;
+}
+
+.near-me-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 6px 0 10px;
+}
+
+.near-me-chip {
+  border-color: var(--accent);
+  color: var(--accent-deep);
+  font-weight: 700;
+}
+
+.geo-hint {
+  font-size: 12px;
+  max-width: 100%;
+}
+
+.merchant-thumb {
+  width: 72px;
+  height: 72px;
+  border-radius: 10px;
+  object-fit: cover;
+  flex-shrink: 0;
+  background: var(--line);
+}
+
+.merchant-thumb.placeholder {
+  background: linear-gradient(135deg, #e3ded4, #f6f4ef);
+}
+
+.distance-pill {
+  color: var(--accent-deep);
+  font-weight: 600;
+}
+
+.cuisine-tag {
+  background: #fdeceb;
+  color: #8c1d17;
+}
+
+.venue-section-title {
+  font-size: 16px;
+  margin: 0 0 10px;
+}
+
+.photo-strip {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 6px;
+  margin-bottom: 12px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.venue-photo {
+  width: 160px;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 10px;
+  flex-shrink: 0;
+  background: var(--line);
+}
+
+.merchant-map-wrap {
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  margin-bottom: 8px;
+  background: #e8eef3;
+}
+
+.merchant-map {
+  z-index: 0;
+}
+
+.merchant-map-attrib {
+  margin: 4px 8px 8px;
+  font-size: 11px;
+}
+
+.bdpay-map-pin {
+  background: transparent;
+  border: none;
+}
+
+.bdpay-map-pin-dot {
+  display: block;
+  width: 18px;
+  height: 18px;
+  border-radius: 50% 50% 50% 0;
+  background: var(--accent);
+  border: 2px solid #fff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+  transform: rotate(-45deg);
+}
+
+.menu-section {
+  margin-bottom: 12px;
+}
+
+.menu-section-title {
+  font-size: 14px;
+  margin: 0 0 6px;
+  color: var(--accent-deep);
+}
+
+.menu-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.menu-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 13px;
+}
+
+.menu-item:last-child {
+  border-bottom: none;
+}
+
+.menu-price {
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.review-card {
+  margin: 0 0 10px;
+  padding: 10px 12px;
+  background: var(--info-bg);
+  border-radius: 10px;
+  border-left: 3px solid var(--accent);
+}
+
+.review-card p {
+  margin: 6px 0 0;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.review-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.review-stars {
+  color: #c58a00;
+  letter-spacing: 1px;
+}
+
+/* Digital diner card */
+.diner-card {
+  background: linear-gradient(145deg, #1a2330 0%, #2c3e55 45%, #8c1d17 100%);
+  color: #f8f4ef;
+  border-radius: 16px;
+  padding: 18px 18px 16px;
+  margin: 12px 0 14px;
+  box-shadow: 0 12px 28px rgba(26, 35, 48, 0.35);
+  min-height: 180px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.diner-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  opacity: 0.92;
+}
+
+.diner-card-chip {
+  width: 36px;
+  height: 28px;
+  border-radius: 6px;
+  background: linear-gradient(135deg, #d4af37, #f5e6a6 40%, #b8860b);
+  opacity: 0.9;
+}
+
+.diner-card-number {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 20px;
+  letter-spacing: 0.12em;
+  font-weight: 600;
+}
+
+.diner-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-top: auto;
+}
+
+.diner-card-label {
+  font-size: 10px;
+  opacity: 0.7;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.diner-card-holder {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.diner-card-contactless {
+  font-size: 22px;
+  opacity: 0.75;
+  transform: rotate(90deg);
+  letter-spacing: -2px;
+}
+
+.wallet-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.tap-hold-btn {
+  min-height: 56px;
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.tap-hold-btn.holding {
+  animation: tap-pulse 0.9s ease-in-out infinite;
+}
+
+@keyframes tap-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(179, 38, 30, 0.45);
+  }
+  50% {
+    transform: scale(1.02);
+    box-shadow: 0 0 0 10px rgba(179, 38, 30, 0);
+  }
+}
+
+.offer-badge.muted {
+  background: var(--line);
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 600;
+}
