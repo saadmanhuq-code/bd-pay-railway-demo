@@ -1,7 +1,5 @@
-# Build context allowlist posture: the image needs ONLY pyproject.toml,
-# bdpay/, db/migrations/, and docker/. Everything else stays out of the
-# context (smaller, faster, and no chance of a stray local file or secret
-# landing in a layer).
+# Gateway Dockerfile.gateway only COPY-selects pyproject/bdpay/db/docker,
+# so FE trees in context are fine (and REQUIRED for Railpack FE builds).
 
 .git
 .venv
@@ -10,20 +8,14 @@
 .pytest_*
 *.egg-info
 
-# Source trees not part of the Python deployable
-apps/
+# Heavy non-runtime trees
 arch/
 docs/
 research/
 spec/
-scripts/
-tests/
 monitoring/
 
-# Docs / mission files at repo root
-*.md
-
-# Dev-only stack + lockfiles not used by pip install
+# Dev-only stack
 docker-compose.dev.yml
 docker-compose.prod.yml
 uv.lock
