@@ -2,7 +2,7 @@
 // public merchant directory (empty/401/404/network), fall back to the local
 // demo catalog so unauthenticated browse still works for demos.
 
-import { eligibleOffers, listDinerMerchants } from "@/lib/api/client";
+import { eligibleOffers, listDinerMerchants, USING_MOCK_API } from "@/lib/api/client";
 import type { CuisineTag, DinerMerchant, EligibleOffer, WindowTag } from "@/lib/api/types";
 import {
   catalogSourceLabel,
@@ -11,7 +11,7 @@ import {
   listDemoMerchants,
   listDemoOffers,
 } from "@/lib/demo/catalog";
-import { isOsmMerchantId } from "@/lib/demo/osmCatalog";
+import { isOsmMerchantId, osmVenueCount } from "@/lib/demo/osmCatalog";
 
 export type DiscoverSource = "api" | "demo" | "osm";
 
@@ -46,7 +46,24 @@ export async function discoverMerchants(params: {
     if (tag) rows = rows.filter((m) => m.window_tags.includes(tag));
     if (city) rows = rows.filter((m) => (m.city ?? "Dhaka") === city);
     if (cuisine) rows = rows.filter((m) => (m.cuisine_tags ?? []).includes(cuisine));
-    if (rows.length > 0) return { merchants: rows, source: "api" };
+    if (rows.length > 0) {
+      // Railway / in-app mock directory is intentionally tiny. Prefer the
+      // OSM public catalog for EatClub-style unauthenticated browse; mock
+      // remains the auth + redemption backend.
+      if (USING_MOCK_API && osmVenueCount() > 0) {
+        const merchants = listDemoMerchants({
+          area: params.area,
+          q: params.q,
+          windowTag: tag,
+          city,
+          cuisine,
+        });
+        if (merchants.length > 0) {
+          return { merchants, source: catalogSourceLabel() };
+        }
+      }
+      return { merchants: rows, source: "api" };
+    }
   } catch {
     // fall through to demo
   }
