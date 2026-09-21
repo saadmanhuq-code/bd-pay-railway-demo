@@ -176,7 +176,7 @@ function buildMerchant(v: OsmVenue): DinerMerchant {
     display_name: v.name,
     display_name_bn: v.name_bn || v.name,
     area: areaLabel(v.area),
-    area_bn: v.area_bn || areaLabel(v.area),
+    area_bn: areaLabel(v.area_bn || v.area),
     cuisine: v.cuisine,
     cuisine_bn: v.cuisine_bn,
     live_offer_count: offers.length,
