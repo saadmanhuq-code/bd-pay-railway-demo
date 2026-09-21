@@ -62,6 +62,11 @@ function resolveBase(): string {
 
 const BASE: string = resolveBase();
 
+/** True when the browser client is pointed at the in-app /api/mock simulator. */
+export const USING_MOCK_API: boolean =
+  BASE === "/api/mock" || BASE.startsWith("/api/mock/");
+
+
 export class ApiError extends Error {
   readonly status: number;
   readonly envelope: ErrorEnvelope | null;

@@ -145,6 +145,10 @@ export function createSignedSession<TExtra extends object>(
     const [first, second] = secretEnvVars;
     const configured = process.env[first]?.trim() || process.env[second]?.trim();
     if (configured) return configured;
+    // Public Railway demo: when SEC-01 mock is explicitly opted in, the
+    // documented per-app devSecret is an acceptable simulator fallback.
+    const mockFlag = process.env.BDPAY_ENABLE_MOCK?.trim().toLowerCase() ?? "";
+    if (["1", "true", "yes", "on"].includes(mockFlag)) return devSecret;
     if (process.env.NODE_ENV === "production") return "";
     return devSecret;
   }

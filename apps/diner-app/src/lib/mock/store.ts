@@ -138,6 +138,8 @@ let otpChallengeSeq = 0;
 function mockOtpSecret(): string | null {
   const configured = process.env.BDPAY_MOCK_OTP_SECRET?.trim();
   if (configured) return configured;
+  const mockFlag = process.env.BDPAY_ENABLE_MOCK?.trim().toLowerCase() ?? "";
+  if (["1", "true", "yes", "on"].includes(mockFlag)) return DEV_OTP_SECRET;
   if (process.env.NODE_ENV === "production") return null;
   return DEV_OTP_SECRET;
 }
@@ -192,7 +194,11 @@ export function otpChallenge(phone: string): MockResult<OtpChallenge> {
     challenge_id: challengeId,
     expires_at: expiresAt,
   };
-  if (process.env.NODE_ENV !== "production") body.debug_otp_code = code;
+  const mockFlag = process.env.BDPAY_ENABLE_MOCK?.trim().toLowerCase() ?? "";
+  const mockOn = ["1", "true", "yes", "on"].includes(mockFlag);
+  // Simulator demos (incl. Railway production mock) surface the code on-screen —
+  // there is no SMS rail. Live SMS path never sets BDPAY_ENABLE_MOCK.
+  if (process.env.NODE_ENV !== "production" || mockOn) body.debug_otp_code = code;
   return { status: 200, body };
 }
 

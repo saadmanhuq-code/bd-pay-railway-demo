@@ -10,6 +10,8 @@ const WINDOW_STEPS = 1;
 function configuredSecret(): string | null {
   const configured = process.env.BDPAY_MOCK_TOTP_SECRET_B32?.trim();
   if (configured) return configured;
+  const mockFlag = process.env.BDPAY_ENABLE_MOCK?.trim().toLowerCase() ?? "";
+  if (["1", "true", "yes", "on"].includes(mockFlag)) return DEV_TOTP_SECRET_B32;
   if (process.env.NODE_ENV === "production") return null;
   return DEV_TOTP_SECRET_B32;
 }

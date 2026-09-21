@@ -7,7 +7,7 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { ApiError, requestOtp, verifyOtp } from "@/lib/api/client";
+import { ApiError, requestOtp, verifyOtp, USING_MOCK_API } from "@/lib/api/client";
 import { normalizeBdMobile } from "@/lib/format";
 import { useLang } from "@/lib/i18n/LangContext";
 import { DualLabel } from "@/lib/i18n/DualLabel";
@@ -79,10 +79,10 @@ export default function LoginPage() {
         <p className="notice">
           <DualLabel k="login_d1_notice" />
         </p>
-        {process.env.NODE_ENV !== "production" ? (
+        {USING_MOCK_API || process.env.NODE_ENV !== "production" ? (
           <p className="notice" role="note">
-            Mock demo (not live SMS): use a BD mobile (e.g. 01700000000); after Send
-            code, enter the on-screen debug OTP. See DEMO.md.
+            Mock demo (not live SMS): use a BD mobile (e.g. 01712345678); after Send
+            code, enter the on-screen debug OTP shown below.
           </p>
         ) : null}
 

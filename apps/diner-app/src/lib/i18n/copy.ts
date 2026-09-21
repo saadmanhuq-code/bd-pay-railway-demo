@@ -333,6 +333,12 @@ export const COPY = {
     bn: "অ্যাকাউন্ট ছাড়াই সব ডিল দেখা যায়। শুধু পেমেন্টের সময় সাইন ইন করুন।",
   },
   browse_results: { en: "restaurants", bn: "টি রেস্তোরাঁ" },
+  browse_showing: {
+    en: "Showing",
+    bn: "দেখানো হচ্ছে",
+  },
+  browse_of: { en: "of", bn: "এর" },
+  browse_load_more: { en: "Load more restaurants", bn: "আরও রেস্তোরাঁ দেখুন" },
 
   // -- location / city / cuisine / maps --------------------------------------
   near_me: { en: "Near me", bn: "আমার কাছে" },

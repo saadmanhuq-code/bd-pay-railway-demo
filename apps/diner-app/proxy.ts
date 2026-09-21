@@ -20,7 +20,7 @@ import { hasValidDinerSession } from "@/lib/mock/session";
 // Public discovery (EatClub-style): browse + merchant detail before login.
 // Redemption still requires a session (API-enforced on reserve/pay).
 const PUBLIC_EXACT = ["/", "/login"];
-const PUBLIC_PREFIXES: string[] = ["/merchants"];
+const PUBLIC_PREFIXES: string[] = ["/merchants", "/data"];
 
 export const proxy = createEdgeProxy({
   hasSession: (req: NextRequest) => hasValidDinerSession(req),

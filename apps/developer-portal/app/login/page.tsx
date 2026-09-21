@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ApiError, login } from "@/lib/api/client";
+import { ApiError, login, USING_MOCK_API } from "@/lib/api/client";
 import type { Persona } from "@/lib/api/types";
 import { PERSONAS } from "@/lib/api/types";
 import { useLang } from "@/lib/i18n/LangContext";
@@ -35,7 +35,7 @@ export default function LoginPage() {
     <main className="centered">
       <form className="login-card" onSubmit={onSubmit}>
         <h1>{t("login_title")}</h1>
-        {process.env.NODE_ENV !== "production" ? (
+        {USING_MOCK_API || process.env.NODE_ENV !== "production" ? (
           <p className="notice" role="note">
             Mock demo (not live money): any email + any password + TOTP for secret{" "}
             <code>JBSWY3DPEHPK3PXP</code>; pick a persona. See DEMO.md.

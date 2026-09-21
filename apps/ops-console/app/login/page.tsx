@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { ApiError, login } from "@/lib/api/client";
+import { ApiError, login, USING_MOCK_API } from "@/lib/api/client";
 import { useLang } from "@/lib/i18n/LangContext";
 import { DualLabel } from "@/lib/i18n/DualLabel";
 
@@ -41,10 +41,11 @@ export default function LoginPage() {
         <h1>
           <DualLabel k="login_title" />
         </h1>
-        {process.env.NODE_ENV !== "production" ? (
+        {USING_MOCK_API || process.env.NODE_ENV !== "production" ? (
           <p className="notice" role="note">
             Mock demo (not live money): any email + any password + TOTP for secret{" "}
-            <code>JBSWY3DPEHPK3PXP</code>. See DEMO.md.
+            <code>JBSWY3DPEHPK3PXP</code> (e.g. use an authenticator app, or any
+            current 6-digit code for that secret).
           </p>
         ) : null}
         <label className="field">

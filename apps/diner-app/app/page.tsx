@@ -43,6 +43,8 @@ const CUISINE_KEYS: Record<CuisineTag, CopyKey> = {
 
 type MerchantRow = DinerMerchant & { distance_km?: number | null };
 
+const PAGE_SIZE = 48;
+
 export default function BrowsePage() {
   // Public browse — never bounce to /login from home.
   const { session, loading: sessionLoading } = useSession(false);
@@ -58,6 +60,7 @@ export default function BrowsePage() {
   const [q, setQ] = useState("");
   const [sortNear, setSortNear] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
   const origin: LatLng | null = geo.position;
 
@@ -86,6 +89,7 @@ export default function BrowsePage() {
   }, [area, q, windowTag, city, cuisine, origin, sortNear, t]);
 
   useEffect(() => {
+    setVisibleCount(PAGE_SIZE);
     load();
   }, [load]);
 
@@ -261,12 +265,13 @@ export default function BrowsePage() {
       ) : (
         <>
           <p className="subtle results-count">
+            {t("browse_showing")} {Math.min(visibleCount, rows.length)} {t("browse_of")}{" "}
             {rows.length} {t("browse_results")}
           </p>
-          {rows.map((m) => (
+          {rows.slice(0, visibleCount).map((m) => (
             <Link
               key={m.merchant_id}
-              href={`/merchants/${m.merchant_id}`}
+              href={`/merchants/${m.merchant_id.split("/").map(encodeURIComponent).join("/")}`}
               className="merchant-card"
             >
               {m.photo_urls?.[0] ? (
@@ -335,6 +340,15 @@ export default function BrowsePage() {
               )}
             </Link>
           ))}
+          {visibleCount < rows.length ? (
+            <button
+              type="button"
+              className="btn btn-block"
+              onClick={() => setVisibleCount((n) => n + PAGE_SIZE)}
+            >
+              {t("browse_load_more")}
+            </button>
+          ) : null}
         </>
       )}
     </Shell>
