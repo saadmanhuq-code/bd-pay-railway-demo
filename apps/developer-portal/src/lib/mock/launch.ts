@@ -20,6 +20,7 @@ import type {
 } from "@/lib/api/launchTypes";
 import { CERT_CHECK_IDS } from "@/lib/api/launchTypes";
 import { DEMO_MERCHANT, SNAPSHOT_AT, detHex, mockError, type MockResult } from "./store";
+import type { SandboxDemoFullflow } from "@/lib/api/types";
 
 // ---------------------------------------------------------------------------
 // Deterministic helpers (mirrors store.ts; those helpers are module-private)
@@ -599,6 +600,102 @@ export function verifySandboxSignupMock(sbxsId: string, otp: string): MockResult
       key_prefix: "bdpk_test_",
       sandbox_base_url: SANDBOX_BASE_URL,
       docs_url: SANDBOX_DOCS_URL,
+    },
+  };
+}
+
+
+// ---------------------------------------------------------------------------
+// Sandbox demo fullflow — GET /v1/sandbox/demo/fullflow
+// Used by Platform status (and live-gateway shim). Deterministic mock so the
+// status page does not hard-fail under BDPAY_ENABLE_MOCK.
+// ---------------------------------------------------------------------------
+
+export function sandboxDemoFullflowMock(): SandboxDemoFullflow {
+  const merchantId = DEMO_MERCHANT.merchant_id;
+  const intentId = id("pi", "sandbox-demo-fullflow");
+  const principalId = id("akey", "sandbox-demo-key");
+  const asOf = SNAPSHOT_AT;
+  return {
+    seed_id: id("seed", "sandbox-demo"),
+    mode: "MOCK",
+    auth: {
+      kind: "api_key",
+      principal_id: principalId,
+      merchant_id: merchantId,
+      operator_id: null,
+      customer_id: null,
+    },
+    summary: {
+      status: "SUCCEEDED",
+      amount_minor: 15000,
+      refunded_minor: 2500,
+      currency: "BDT",
+      as_of: asOf,
+    },
+    merchant: {
+      merchant_id: merchantId,
+      trade_name: DEMO_MERCHANT.trade_name,
+      trade_name_bn: DEMO_MERCHANT.trade_name_bn,
+      status: DEMO_MERCHANT.status,
+    },
+    customer: {
+      customer_id: id("cust", "sandbox-demo-payer"),
+      phone_masked: "017****5678",
+    },
+    intent: {
+      payment_intent_id: intentId,
+      merchant_id: merchantId,
+      customer_id: id("cust", "sandbox-demo-payer"),
+      amount_minor: 15000,
+      currency: "BDT",
+      method: "NAGAD",
+      status: "SUCCEEDED",
+      created_at: tsAt(-30),
+    },
+    attempts: {
+      data: [
+        {
+          attempt_id: id("pat", "sandbox-demo-1"),
+          payment_intent_id: intentId,
+          status: "SUCCEEDED",
+          method: "NAGAD",
+          amount_minor: 15000,
+          created_at: tsAt(-30),
+        },
+      ],
+      next_cursor: null,
+    },
+    refunds: {
+      data: [
+        {
+          refund_id: id("rfnd", "sandbox-demo-1"),
+          payment_intent_id: intentId,
+          amount_minor: 2500,
+          status: "SUCCEEDED",
+          created_at: tsAt(-10),
+        },
+      ],
+      next_cursor: null,
+    },
+    ledger: {
+      available: true,
+      entries: [
+        {
+          entry_id: id("led", "sandbox-demo-debit"),
+          direction: "debit",
+          amount_minor: 15000,
+          currency: "BDT",
+          created_at: tsAt(-30),
+        },
+        {
+          entry_id: id("led", "sandbox-demo-refund"),
+          direction: "credit",
+          amount_minor: 2500,
+          currency: "BDT",
+          created_at: tsAt(-10),
+        },
+      ],
     },
   };
 }

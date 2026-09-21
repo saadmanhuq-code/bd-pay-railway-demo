@@ -81,8 +81,7 @@ export default function LoginPage() {
         </p>
         {USING_MOCK_API || process.env.NODE_ENV !== "production" ? (
           <p className="notice" role="note">
-            Mock demo (not live SMS): use a BD mobile (e.g. 01712345678); after Send
-            code, enter the on-screen debug OTP shown below.
+            {t("login_mock_sms_notice")}
           </p>
         ) : null}
 

@@ -162,6 +162,10 @@ export const COPY = {
   },
   login_verify: { en: "Verify & sign in", bn: "যাচাই করে সাইন ইন করুন" },
   login_change_phone: { en: "Change number", bn: "নম্বর পরিবর্তন করুন" },
+  login_mock_sms_notice: {
+    en: "Mock demo (not live SMS): use a BD mobile (e.g. 01712345678); after Send code, enter the on-screen debug OTP shown below.",
+    bn: "মক ডেমো (লাইভ এসএমএস নয়): বাংলাদেশি মোবাইল ব্যবহার করুন (যেমন ০১৭১২৩৪৫৬৭৮); কোড পাঠানোর পর নিচের অন-স্ক্রিন ডিবাগ ওটিপি দিন।",
+  },
 
   // -- browse ----------------------------------------------------------------
   browse_title: { en: "Restaurants near you", bn: "আপনার কাছের রেস্তোরাঁ" },

@@ -49,14 +49,24 @@ export default function StatusPage() {
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(() => {
-    Promise.all([getPublicStatus(), getPublicCertificationMatrix(), getSandboxDemoFullflow()])
-      .then(([s, m, d]) => {
-        setStatus(s);
-        setMatrix(m);
-        setDemo(d);
-        setError(null);
-      })
-      .catch((err) => setError(err instanceof ApiError ? err.message : t("error_generic")));
+    // Load independently: a missing sandbox demo route must not blank
+    // connector health + certification (demo-risk on /status).
+    setError(null);
+    void getPublicStatus()
+      .then((s) => setStatus(s))
+      .catch((err) => {
+        setStatus(null);
+        setError(err instanceof ApiError ? err.message : t("error_generic"));
+      });
+    void getPublicCertificationMatrix()
+      .then((m) => setMatrix(m))
+      .catch((err) => {
+        setMatrix(null);
+        setError((prev) => prev ?? (err instanceof ApiError ? err.message : t("error_generic")));
+      });
+    void getSandboxDemoFullflow()
+      .then((d) => setDemo(d))
+      .catch(() => setDemo(null));
   }, [t]);
 
   useEffect(() => {
