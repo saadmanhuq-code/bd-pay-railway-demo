@@ -33,6 +33,10 @@ export function LangProvider({ children }: { children: React.ReactNode }) {
     // No navigator sniffing: bn is the default unless the user chose en.
   }, []);
 
+  useEffect(() => {
+    document.documentElement.lang = lang;
+  }, [lang]);
+
   const setLang = useCallback((next: Lang) => {
     setLangState(next);
     window.localStorage.setItem(STORAGE_KEY, next);

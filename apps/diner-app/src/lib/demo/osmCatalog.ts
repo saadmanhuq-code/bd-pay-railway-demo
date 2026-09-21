@@ -49,6 +49,17 @@ const cache = osmCache as OsmCacheFile;
 
 const VALID_UNTIL = "2026-12-31T18:00:00Z";
 
+// OSM area names are sourced from free-form tags. Keep the source data intact,
+// but normalize known neighborhood casing at the catalog boundary so filters,
+// chips, cards, and detail pages all use the same display value.
+const OSM_AREA_LABELS: Record<string, string> = {
+  korail: "Korail",
+};
+
+function areaLabel(area: string): string {
+  return OSM_AREA_LABELS[area.toLowerCase()] ?? area;
+}
+
 const OFFER_TEMPLATES: Array<{
   kind: "PERCENT_OFF";
   title: string;
@@ -164,8 +175,8 @@ function buildMerchant(v: OsmVenue): DinerMerchant {
     merchant_id: v.id,
     display_name: v.name,
     display_name_bn: v.name_bn || v.name,
-    area: v.area,
-    area_bn: v.area_bn || v.area,
+    area: areaLabel(v.area),
+    area_bn: v.area_bn || areaLabel(v.area),
     cuisine: v.cuisine,
     cuisine_bn: v.cuisine_bn,
     live_offer_count: offers.length,
