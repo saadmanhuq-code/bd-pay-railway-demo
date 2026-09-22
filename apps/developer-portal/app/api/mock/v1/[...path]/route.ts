@@ -14,7 +14,7 @@ import { createHash } from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
 import type { DisbursementRow, Env, Paginated, Session } from "@/lib/api/types";
 import {
-  SNAPSHOT_AT,
+  sessionWindow,
   approveBatchMock,
   createApiKeyMock,
   createBatchMock,
@@ -149,8 +149,7 @@ export async function GET(req: NextRequest, ctx: Ctx): Promise<NextResponse> {
     const body: Session = {
       member: getMember(persona),
       merchant: DEMO_MERCHANT,
-      issued_at: SNAPSHOT_AT,
-      absolute_expires_at: new Date(Date.parse(SNAPSHOT_AT) + 8 * 3_600_000).toISOString().replace(".000Z", "Z"),
+      ...sessionWindow(8),
     };
     return NextResponse.json(body, { status: 200 });
   }

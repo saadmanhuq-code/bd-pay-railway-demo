@@ -45,9 +45,11 @@ function sha(key: string): string {
   return detHex(`sha256:${key}`, 64);
 }
 
-// Rolling demo "now": anchored once per process to the current UTC hour so
-// relative seed offsets stay deterministic inside a replica, while AgeBadge
-// never paints multi-month "101d old" on a fresh client walk (demo risk).
+// Seed epoch: anchored once per process to the current UTC hour so relative
+// offsets stay deterministic inside a replica (IDs, trend points, row times).
+// AgeBadge + session clocks use wall-clock helpers below — a long-lived
+// Railway replica must not paint multi-hour "5h old" or mint already-expired
+// sessions eight hours after boot (afternoon demo risk).
 function demoSnapshotAt(): string {
   const d = new Date();
   d.setUTCMinutes(0, 0, 0);
@@ -58,6 +60,20 @@ const EPOCH_MS = Date.parse(SNAPSHOT_AT);
 
 function tsAt(offsetMinutes: number): string {
   return new Date(EPOCH_MS + offsetMinutes * 60_000).toISOString().replace(".000Z", "Z");
+}
+
+/** AgeBadge as_of — N minutes before wall now (independent of seed EPOCH). */
+export function asOfMinutesAgo(minutes: number): string {
+  return new Date(Date.now() - minutes * 60_000).toISOString().replace(".000Z", "Z");
+}
+
+/** Session issued/expiry window for mock auth responses. */
+export function sessionWindow(hoursValid = 8): { issued_at: string; absolute_expires_at: string } {
+  const issued = Date.now();
+  return {
+    issued_at: new Date(issued).toISOString().replace(".000Z", "Z"),
+    absolute_expires_at: new Date(issued + hoursValid * 3_600_000).toISOString().replace(".000Z", "Z"),
+  };
 }
 
 // Deterministic mutation clock: base constant + monotonic counter.
@@ -856,7 +872,7 @@ export function getReports(): ReportItem[] {
 
 export function tcsaDashboard(): TcsaDashboard {
   return {
-    as_of: tsAt(-1),
+    as_of: asOfMinutesAgo(1),
     required_minor: "48250000000",
     available_minor: "49100000000",
     coverage_bps: 10176,
@@ -875,7 +891,7 @@ export function tcsaDashboard(): TcsaDashboard {
 
 export function settlementDashboard(): SettlementDashboard {
   return {
-    as_of: tsAt(-3),
+    as_of: asOfMinutesAgo(3),
     instructions_by_state: [
       { state: "PENDING", count: 412, amount_minor: "1284500000" },
       { state: "BATCHED", count: 1108, amount_minor: "5230900000" },
@@ -892,7 +908,7 @@ export function settlementDashboard(): SettlementDashboard {
 
 export function connectorsDashboard(): ConnectorsDashboard {
   return {
-    as_of: tsAt(-2),
+    as_of: asOfMinutesAgo(2),
     connectors: connectors.map((c) => ({
       connector_id: c.connector_id,
       display_name: c.display_name,
@@ -906,7 +922,7 @@ export function connectorsDashboard(): ConnectorsDashboard {
 
 export function amlDashboard(): AmlDashboard {
   return {
-    as_of: tsAt(-4),
+    as_of: asOfMinutesAgo(4),
     alert_queue_depth: 17,
     alert_age_histogram: [
       { bucket: "0-6h", count: 5 },
@@ -932,7 +948,7 @@ export function amlDashboard(): AmlDashboard {
 
 export function slaDashboard(): SlaDashboard {
   return {
-    as_of: tsAt(-2),
+    as_of: asOfMinutesAgo(2),
     route_groups: [
       { group: "payment-intents", p50_ms: 42, p95_ms: 180, p99_ms: 420 },
       { group: "refunds", p50_ms: 51, p95_ms: 210, p99_ms: 530 },

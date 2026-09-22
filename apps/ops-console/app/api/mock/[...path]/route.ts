@@ -7,7 +7,7 @@ import { NextRequest, NextResponse } from "next/server";
 import type { Paginated, Session } from "@/lib/api/types";
 import {
   DEMO_OPERATOR_ID,
-  SNAPSHOT_AT,
+  sessionWindow,
   amlDashboard,
   approveApprovalMock,
   assignCaseMock,
@@ -132,8 +132,7 @@ export async function GET(req: NextRequest, ctx: Ctx): Promise<NextResponse> {
     if (!(await hasSession(req))) return unauthenticated();
     const body: Session = {
       operator: getDemoOperator(),
-      issued_at: SNAPSHOT_AT,
-      absolute_expires_at: new Date(Date.parse(SNAPSHOT_AT) + 8 * 3_600_000).toISOString().replace(".000Z", "Z"),
+      ...sessionWindow(8),
     };
     return NextResponse.json(body, { status: 200 });
   }

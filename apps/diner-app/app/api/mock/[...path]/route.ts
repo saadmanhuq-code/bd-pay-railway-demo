@@ -10,7 +10,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import type { DinerSession, Paginated, PaymentIntentView } from "@/lib/api/types";
 import {
-  SNAPSHOT_AT,
   confirmIntentMock,
   createOfferIntentMock,
   eligibleOffersMock,
@@ -82,10 +81,12 @@ export async function GET(req: NextRequest, ctx: Ctx): Promise<NextResponse> {
 
   if (p[1] === "auth" && p[2] === "diner" && p[3] === "session") {
     if (!(await hasSession(req))) return unauthenticated();
+    const issued = Date.now();
     const body: DinerSession = {
       customer: getDemoCustomer(),
-      issued_at: SNAPSHOT_AT,
-      absolute_expires_at: "2026-06-13T22:00:00Z",
+      issued_at: new Date(issued).toISOString().replace(".000Z", "Z"),
+      // Match cookie TTL (12h) — do not advertise the frozen June SNAPSHOT expiry.
+      absolute_expires_at: new Date(issued + 12 * 3_600_000).toISOString().replace(".000Z", "Z"),
     };
     return NextResponse.json(body, { status: 200 });
   }

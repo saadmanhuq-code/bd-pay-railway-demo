@@ -75,9 +75,10 @@ function sha(key: string): string {
   return detHex(`sha256:${key}`, 64);
 }
 
-// Rolling demo "now": anchored once per process to the current UTC hour so
-// relative seed offsets stay deterministic inside a replica, while AgeBadge
-// never paints multi-month "101d old" on a fresh client walk (demo risk).
+// Seed epoch: anchored once per process to the current UTC hour so relative
+// offsets stay deterministic inside a replica. AgeBadge + session clocks use
+// wall-clock helpers — long-lived replicas must not show multi-hour AgeBadge
+// or mint sessions that expire against a boot-time SNAPSHOT_AT.
 function demoSnapshotAt(): string {
   const d = new Date();
   d.setUTCMinutes(0, 0, 0);
@@ -88,6 +89,20 @@ const EPOCH_MS = Date.parse(SNAPSHOT_AT);
 
 function tsAt(offsetMinutes: number): string {
   return new Date(EPOCH_MS + offsetMinutes * 60_000).toISOString().replace(".000Z", "Z");
+}
+
+/** AgeBadge as_of — N minutes before wall now (independent of seed EPOCH). */
+export function asOfMinutesAgo(minutes: number): string {
+  return new Date(Date.now() - minutes * 60_000).toISOString().replace(".000Z", "Z");
+}
+
+/** Session issued/expiry window for mock auth responses. */
+export function sessionWindow(hoursValid = 8): { issued_at: string; absolute_expires_at: string } {
+  const issued = Date.now();
+  return {
+    issued_at: new Date(issued).toISOString().replace(".000Z", "Z"),
+    absolute_expires_at: new Date(issued + hoursValid * 3_600_000).toISOString().replace(".000Z", "Z"),
+  };
 }
 
 // Deterministic mutation clock: base constant + monotonic counter.
@@ -374,7 +389,7 @@ export function merchantDashboard(env: Env): MerchantDashboard {
   const inWindow = (cut: number) => succeeded.filter((r) => Date.parse(r.created_at) >= cut);
   const successRateBps = terminal.length === 0 ? 0 : Math.round((succeeded.length / terminal.length) * 10_000);
   return {
-    as_of: SNAPSHOT_AT,
+    as_of: asOfMinutesAgo(0),
     env,
     volume_today_minor: sum(inWindow(todayCut)),
     volume_7d_minor: sum(inWindow(d7Cut)),

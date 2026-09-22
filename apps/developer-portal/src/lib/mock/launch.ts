@@ -19,7 +19,7 @@ import type {
   SandboxSignupVerified,
 } from "@/lib/api/launchTypes";
 import { CERT_CHECK_IDS } from "@/lib/api/launchTypes";
-import { DEMO_MERCHANT, SNAPSHOT_AT, detHex, mockError, type MockResult } from "./store";
+import { DEMO_MERCHANT, SNAPSHOT_AT, asOfMinutesAgo, detHex, mockError, type MockResult } from "./store";
 import type { SandboxDemoFullflow } from "@/lib/api/types";
 
 // ---------------------------------------------------------------------------
@@ -104,7 +104,7 @@ const STATUS_FEED: ConnectorStatusEntry[] = [
 ];
 
 export function publicStatusMock(): PublicStatusFeed {
-  return { as_of: SNAPSHOT_AT, data: STATUS_FEED };
+  return { as_of: asOfMinutesAgo(1), data: STATUS_FEED };
 }
 
 // ---------------------------------------------------------------------------
@@ -157,7 +157,7 @@ const CERT_MATRIX: CertificationEntry[] = [
 ];
 
 export function certificationMatrixMock(): CertificationMatrix {
-  return { as_of: SNAPSHOT_AT, data: CERT_MATRIX };
+  return { as_of: asOfMinutesAgo(2), data: CERT_MATRIX };
 }
 
 // Badge — GET /v1/public/badges/{connector_id}.svg. Deterministic SVG;
@@ -615,7 +615,7 @@ export function sandboxDemoFullflowMock(): SandboxDemoFullflow {
   const merchantId = DEMO_MERCHANT.merchant_id;
   const intentId = id("pi", "sandbox-demo-fullflow");
   const principalId = id("akey", "sandbox-demo-key");
-  const asOf = SNAPSHOT_AT;
+  const asOf = asOfMinutesAgo(1);
   return {
     seed_id: id("seed", "sandbox-demo"),
     mode: "MOCK",
