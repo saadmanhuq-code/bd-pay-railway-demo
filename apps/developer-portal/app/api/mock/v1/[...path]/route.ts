@@ -150,7 +150,7 @@ export async function GET(req: NextRequest, ctx: Ctx): Promise<NextResponse> {
       member: getMember(persona),
       merchant: DEMO_MERCHANT,
       issued_at: SNAPSHOT_AT,
-      absolute_expires_at: "2026-06-12T17:00:00Z",
+      absolute_expires_at: new Date(Date.parse(SNAPSHOT_AT) + 8 * 3_600_000).toISOString().replace(".000Z", "Z"),
     };
     return NextResponse.json(body, { status: 200 });
   }

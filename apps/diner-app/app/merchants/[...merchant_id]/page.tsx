@@ -255,7 +255,16 @@ export default function MerchantOffersPage() {
               <div className="photo-strip">
                 {(merchant.photo_urls ?? []).map((url) => (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img key={url} src={url} alt="" className="venue-photo" loading="lazy" />
+                  <img
+                    key={url}
+                    src={url}
+                    alt=""
+                    className="venue-photo"
+                    loading="lazy"
+                    onError={(e) => {
+                      e.currentTarget.style.display = "none";
+                    }}
+                  />
                 ))}
               </div>
             </section>

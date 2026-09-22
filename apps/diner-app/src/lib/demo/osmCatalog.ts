@@ -52,12 +52,22 @@ const VALID_UNTIL = "2026-12-31T18:00:00Z";
 // OSM area names are sourced from free-form tags. Keep the source data intact,
 // but normalize known neighborhood casing at the catalog boundary so filters,
 // chips, cards, and detail pages all use the same display value.
-const OSM_AREA_LABELS: Record<string, string> = {
+const OSM_AREA_LABELS_EN: Record<string, string> = {
   korail: "Korail",
+  "করাইল": "Korail",
 };
 
-function areaLabel(area: string): string {
-  return OSM_AREA_LABELS[area.toLowerCase()] ?? area;
+const OSM_AREA_LABELS_BN: Record<string, string> = {
+  korail: "করাইল",
+  "করাইল": "করাইল",
+};
+
+function areaLabelEn(area: string): string {
+  return OSM_AREA_LABELS_EN[area.toLowerCase()] ?? OSM_AREA_LABELS_EN[area] ?? area;
+}
+
+function areaLabelBn(area: string): string {
+  return OSM_AREA_LABELS_BN[area.toLowerCase()] ?? OSM_AREA_LABELS_BN[area] ?? area;
 }
 
 const OFFER_TEMPLATES: Array<{
@@ -141,7 +151,10 @@ function hashId(id: string): number {
 }
 
 function picsum(seed: string, w = 640, h = 360): string {
-  return `https://picsum.photos/seed/${encodeURIComponent(seed)}/${w}/${h}`;
+  // Reuse a small deterministic pool. Unique-per-venue seeds stampede picsum
+  // under browse load (dozens of redirects) and leave broken merchant thumbs.
+  const pool = hashId(seed) % 24;
+  return `https://picsum.photos/seed/bdpay-venue-${pool}/${w}/${h}`;
 }
 
 function offersForVenue(venueId: string): EligibleOffer[] {
@@ -175,8 +188,8 @@ function buildMerchant(v: OsmVenue): DinerMerchant {
     merchant_id: v.id,
     display_name: v.name,
     display_name_bn: v.name_bn || v.name,
-    area: areaLabel(v.area),
-    area_bn: areaLabel(v.area_bn || v.area),
+    area: areaLabelEn(v.area),
+    area_bn: areaLabelBn(v.area_bn || v.area),
     cuisine: v.cuisine,
     cuisine_bn: v.cuisine_bn,
     live_offer_count: offers.length,

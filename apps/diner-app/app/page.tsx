@@ -283,10 +283,19 @@ export default function BrowsePage() {
                   width={72}
                   height={72}
                   loading="lazy"
+                  onError={(e) => {
+                    const el = e.currentTarget;
+                    el.style.display = "none";
+                    const ph = el.nextElementSibling;
+                    if (ph instanceof HTMLElement) ph.hidden = false;
+                  }}
                 />
-              ) : (
-                <div className="merchant-thumb placeholder" aria-hidden />
-              )}
+              ) : null}
+              <div
+                className="merchant-thumb placeholder"
+                aria-hidden
+                hidden={Boolean(m.photo_urls?.[0])}
+              />
               <div className="merchant-main">
                 <div className="merchant-name">
                   {lang === "bn" ? m.display_name_bn : m.display_name}

@@ -45,8 +45,15 @@ function sha(key: string): string {
   return detHex(`sha256:${key}`, 64);
 }
 
-// Fixed mock "now": every seeded timestamp is anchored to this constant.
-export const SNAPSHOT_AT = "2026-06-12T09:00:00Z";
+// Rolling demo "now": anchored once per process to the current UTC hour so
+// relative seed offsets stay deterministic inside a replica, while AgeBadge
+// never paints multi-month "101d old" on a fresh client walk (demo risk).
+function demoSnapshotAt(): string {
+  const d = new Date();
+  d.setUTCMinutes(0, 0, 0);
+  return d.toISOString().replace(".000Z", "Z");
+}
+export const SNAPSHOT_AT = demoSnapshotAt();
 const EPOCH_MS = Date.parse(SNAPSHOT_AT);
 
 function tsAt(offsetMinutes: number): string {
