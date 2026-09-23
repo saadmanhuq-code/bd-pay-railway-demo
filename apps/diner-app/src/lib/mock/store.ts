@@ -181,7 +181,9 @@ export function otpChallenge(phone: string): MockResult<OtpChallenge> {
   }
   otpChallengeSeq += 1;
   const challengeId = id("otpc", `challenge|${phone}|${otpChallengeSeq}`);
-  const expiresAt = new Date(Date.parse(SNAPSHOT_AT) + OTP_TTL_MS).toISOString().replace(".000Z", "Z");
+  // Wall-clock TTL (same posture as session cookie / QR) — SNAPSHOT_AT is for
+  // deterministic offer windows, not auth challenge lifetime on a long-lived replica.
+  const expiresAt = new Date(Date.now() + OTP_TTL_MS).toISOString().replace(/\.\d{3}Z$/, "Z");
   const code = otpCode(secret, phone, challengeId);
   otpChallengesByPhone.set(phone, {
     phone,
@@ -209,6 +211,10 @@ export function verifyOtpChallenge(phone: string, code: string): MockResult<{ ok
   }
   const rec = otpChallengesByPhone.get(phone);
   if (!rec || rec.phone !== phone || rec.attemptsRemaining <= 0) {
+    return mockError("authentication", "otp_invalid", "The one-time code did not match.");
+  }
+  if (Date.parse(rec.expires_at) < Date.now()) {
+    otpChallengesByPhone.delete(phone);
     return mockError("authentication", "otp_invalid", "The one-time code did not match.");
   }
   const submitted = code.trim();

@@ -29,7 +29,7 @@ export function Shell({
     }
   }
 
-  const browseActive = pathname === "/" || pathname.startsWith("/merchants");
+  const browseActive = pathname === "/" || pathname === "/browse" || pathname.startsWith("/merchants");
   const historyActive = pathname === "/history";
   const cardActive = pathname === "/wallet" || pathname.startsWith("/wallet");
   const loginNext = pathname.startsWith("/merchants")

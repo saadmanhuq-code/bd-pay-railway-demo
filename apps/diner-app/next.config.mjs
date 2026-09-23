@@ -23,6 +23,10 @@ const nextConfig = {
   async headers() {
     return [securityHeadersRoute()];
   },
+  async redirects() {
+    // Alias preferred by demos/docs — keep public discovery on home.
+    return [{ source: "/browse", destination: "/", permanent: false }];
+  },
 };
 
 export default nextConfig;

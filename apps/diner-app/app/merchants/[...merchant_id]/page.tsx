@@ -249,79 +249,6 @@ export default function MerchantOffersPage() {
             </p>
           ) : null}
 
-          {(merchant.photo_urls ?? []).length > 0 ? (
-            <section className="venue-photos" aria-label={t("photos_title")}>
-              <h2 className="venue-section-title">{t("photos_title")}</h2>
-              <div className="photo-strip">
-                {(merchant.photo_urls ?? []).map((url) => (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    key={url}
-                    src={url}
-                    alt=""
-                    className="venue-photo"
-                    loading="lazy"
-                    onError={(e) => {
-                      e.currentTarget.style.display = "none";
-                    }}
-                  />
-                ))}
-              </div>
-            </section>
-          ) : null}
-
-          {merchant.lat != null && merchant.lng != null ? (
-            <section className="panel venue-map-panel">
-              <h2 className="venue-section-title">{t("map_title")}</h2>
-              <MerchantMap
-                lat={merchant.lat}
-                lng={merchant.lng}
-                label={lang === "bn" ? merchant.display_name_bn : merchant.display_name}
-              />
-              {!geo.position ? (
-                <button type="button" className="btn btn-block" onClick={() => geo.request()}>
-                  {geo.status === "prompting" ? t("near_me_locating") : t("near_me")}
-                </button>
-              ) : null}
-            </section>
-          ) : null}
-
-          {(merchant.menu_sections ?? []).length > 0 ? (
-            <section className="panel">
-              <h2 className="venue-section-title">{t("menu_title")}</h2>
-              {(merchant.menu_sections ?? []).map((section) => (
-                <div key={section.title} className="menu-section">
-                  <h3 className="menu-section-title">
-                    {lang === "bn" ? section.title_bn : section.title}
-                  </h3>
-                  <ul className="menu-list">
-                    {section.items.map((item) => (
-                      <li key={item.name} className="menu-item">
-                        <span>{lang === "bn" ? item.name_bn : item.name}</span>
-                        <span className="menu-price">{money(lang, item.price_minor)}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ))}
-            </section>
-          ) : null}
-
-          {(merchant.reviews ?? []).length > 0 ? (
-            <section className="panel">
-              <h2 className="venue-section-title">{t("reviews_title")}</h2>
-              <p className="subtle">{t("reviews_demo_note")}</p>
-              {(merchant.reviews ?? []).map((r, i) => (
-                <blockquote key={i} className="review-card">
-                  <div className="review-head">
-                    <strong>{lang === "bn" ? r.author_bn : r.author}</strong>
-                    <span className="review-stars">{"★".repeat(r.stars)}{"☆".repeat(5 - r.stars)}</span>
-                  </div>
-                  <p>{lang === "bn" ? r.text_bn : r.text}</p>
-                </blockquote>
-              ))}
-            </section>
-          ) : null}
         </>
       ) : null}
 
@@ -604,6 +531,85 @@ export default function MerchantOffersPage() {
           </section>
         </>
       )}
+      {/* Venue context below offers — product CTA stays above the fold. */}
+      {merchant ? (
+        <>
+          {(merchant.photo_urls ?? []).length > 0 ? (
+            <section className="venue-photos" aria-label={t("photos_title")}>
+              <h2 className="venue-section-title">{t("photos_title")}</h2>
+              <div className="photo-strip">
+                {(merchant.photo_urls ?? []).map((url) => (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    key={url}
+                    src={url}
+                    alt=""
+                    className="venue-photo"
+                    loading="lazy"
+                    onError={(e) => {
+                      e.currentTarget.style.display = "none";
+                    }}
+                  />
+                ))}
+              </div>
+            </section>
+          ) : null}
+
+          {merchant.lat != null && merchant.lng != null ? (
+            <section className="panel venue-map-panel">
+              <h2 className="venue-section-title">{t("map_title")}</h2>
+              <MerchantMap
+                lat={merchant.lat}
+                lng={merchant.lng}
+                label={lang === "bn" ? merchant.display_name_bn : merchant.display_name}
+              />
+              {!geo.position ? (
+                <button type="button" className="btn btn-block" onClick={() => geo.request()}>
+                  {geo.status === "prompting" ? t("near_me_locating") : t("near_me")}
+                </button>
+              ) : null}
+            </section>
+          ) : null}
+
+          {(merchant.menu_sections ?? []).length > 0 ? (
+            <section className="panel">
+              <h2 className="venue-section-title">{t("menu_title")}</h2>
+              {(merchant.menu_sections ?? []).map((section) => (
+                <div key={section.title} className="menu-section">
+                  <h3 className="menu-section-title">
+                    {lang === "bn" ? section.title_bn : section.title}
+                  </h3>
+                  <ul className="menu-list">
+                    {section.items.map((item) => (
+                      <li key={item.name} className="menu-item">
+                        <span>{lang === "bn" ? item.name_bn : item.name}</span>
+                        <span className="menu-price">{money(lang, item.price_minor)}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </section>
+          ) : null}
+
+          {(merchant.reviews ?? []).length > 0 ? (
+            <section className="panel">
+              <h2 className="venue-section-title">{t("reviews_title")}</h2>
+              <p className="subtle">{t("reviews_demo_note")}</p>
+              {(merchant.reviews ?? []).map((r, i) => (
+                <blockquote key={i} className="review-card">
+                  <div className="review-head">
+                    <strong>{lang === "bn" ? r.author_bn : r.author}</strong>
+                    <span className="review-stars">{"★".repeat(r.stars)}{"☆".repeat(5 - r.stars)}</span>
+                  </div>
+                  <p>{lang === "bn" ? r.text_bn : r.text}</p>
+                </blockquote>
+              ))}
+            </section>
+          ) : null}
+        </>
+      ) : null}
+
     </Shell>
   );
 }
