@@ -390,7 +390,7 @@ export function merchantDashboard(env: Env): MerchantDashboard {
     payment_intent_id: id("pi", `intent:${i}`),
     env: s.env,
     amount_minor: s.amount,
-    currency: "BDT",
+    currency: "BDT" as const,
     method: s.method,
     status: s.status,
     created_at: wallTs(s.offset),
