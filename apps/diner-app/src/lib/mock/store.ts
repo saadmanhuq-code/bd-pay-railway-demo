@@ -952,8 +952,10 @@ export function createOfferIntentMock(params: {
     status: "CREATED",
     offer: { offer_id: offerRec.offer_id, gross_amount_minor: gross, discount_minor: discount },
     redemption_state: "RESERVED",
-    created_at: SNAPSHOT_AT,
-    expires_at: RESERVED_EXPIRES_AT,
+    // Wall-clock create/expiry for demo honesty; offer-window eligibility still
+    // evaluates against SNAPSHOT_AT fixtures above.
+    created_at: new Date().toISOString().replace(/\.\d{3}Z$/, "Z"),
+    expires_at: new Date(Date.now() + RESERVATION_TTL_MS).toISOString().replace(/\.\d{3}Z$/, "Z"),
     offer_version: offerRec.version,
   };
   INTENTS.set(pi, record);
@@ -970,11 +972,26 @@ export function getIntentMock(paymentIntentId: string): MockResult<PaymentIntent
   return { status: 200, body: intentView(rec) };
 }
 
+/** Seed history ages (ms before wall now) — keeps "My usage" recent on long-lived demos. */
+const HIST_AGE_MS: Record<string, number> = {
+  [id("pi", "hist-applied")]: 2 * 86_400_000,
+  [id("pi", "hist-released")]: 3 * 86_400_000,
+  [id("pi", "hist-reversed")]: 5 * 86_400_000,
+  [id("pi", "hist-settled")]: 10 * 86_400_000,
+};
+
 export function listMyIntentsMock(): PaymentIntentView[] {
+  const now = Date.now();
   return [...INTENTS.values()]
     .filter((r) => r.customer_id === DEMO_CUSTOMER_ID)
-    .sort((a, b) => (a.created_at < b.created_at ? 1 : -1))
-    .map((r) => intentView(r));
+    .map((r) => {
+      const view = intentView(r);
+      const age = HIST_AGE_MS[r.payment_intent_id];
+      if (age == null) return view;
+      const at = new Date(now - age).toISOString().replace(/\.\d{3}Z$/, "Z");
+      return { ...view, created_at: at, expires_at: at };
+    })
+    .sort((a, b) => (a.created_at < b.created_at ? 1 : -1));
 }
 
 /** POST /v1/payment-intents/{id}/confirm — the simulated rail. Refusal-first:

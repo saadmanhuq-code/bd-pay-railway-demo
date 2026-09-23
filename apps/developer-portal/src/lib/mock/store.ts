@@ -76,9 +76,10 @@ function sha(key: string): string {
 }
 
 // Seed epoch: anchored once per process to the current UTC hour so relative
-// offsets stay deterministic inside a replica. AgeBadge + session clocks use
-// wall-clock helpers — long-lived replicas must not show multi-hour AgeBadge
-// or mint sessions that expire against a boot-time SNAPSHOT_AT.
+// offsets stay deterministic inside a replica. AgeBadge, session clocks, and
+// dashboard row freshness use wall-clock helpers — long-lived replicas must
+// not show yesterday's intents next to a "0s old" AgeBadge or mint sessions
+// that expire against a boot-time SNAPSHOT_AT.
 function demoSnapshotAt(): string {
   const d = new Date();
   d.setUTCMinutes(0, 0, 0);
@@ -379,13 +380,27 @@ const intents: PaymentIntentSummary[] = INTENT_SEED.map((s, i) => ({
 }));
 
 export function merchantDashboard(env: Env): MerchantDashboard {
-  const mine = intents.filter((x) => x.env === env);
+  // Remap created_at / settlement stamps from seed offsets onto wall clock so
+  // "Volume today" and recent intents stay same-day on long-lived Railway
+  // replicas (AgeBadge was already wall-clock; row times were boot-frozen).
+  const now = Date.now();
+  const wallTs = (offsetMinutes: number): string =>
+    new Date(now + offsetMinutes * 60_000).toISOString().replace(".000Z", "Z");
+  const mine: PaymentIntentSummary[] = INTENT_SEED.map((s, i) => ({
+    payment_intent_id: id("pi", `intent:${i}`),
+    env: s.env,
+    amount_minor: s.amount,
+    currency: "BDT",
+    method: s.method,
+    status: s.status,
+    created_at: wallTs(s.offset),
+  })).filter((x) => x.env === env);
   const succeeded = mine.filter((x) => x.status === "SUCCEEDED" || x.status === "PARTIALLY_REFUNDED");
   const terminal = mine.filter((x) => x.status === "SUCCEEDED" || x.status === "PARTIALLY_REFUNDED" || x.status === "FAILED");
   const sum = (rows: PaymentIntentSummary[]): string =>
     rows.reduce((acc, r) => acc + BigInt(r.amount_minor), 0n).toString();
-  const todayCut = EPOCH_MS - 9 * 3_600_000; // mock day starts 00:00 UTC of SNAPSHOT_AT
-  const d7Cut = EPOCH_MS - 7 * 24 * 3_600_000;
+  const todayCut = now - 9 * 3_600_000; // rolling ~day window from wall now
+  const d7Cut = now - 7 * 24 * 3_600_000;
   const inWindow = (cut: number) => succeeded.filter((r) => Date.parse(r.created_at) >= cut);
   const successRateBps = terminal.length === 0 ? 0 : Math.round((succeeded.length / terminal.length) * 10_000);
   return {
@@ -398,9 +413,9 @@ export function merchantDashboard(env: Env): MerchantDashboard {
     success_rate_bps: successRateBps,
     settlement: {
       pending_minor: env === "live" ? "1842500" : "70300",
-      next_release_at: tsAt(60 * 26),
+      next_release_at: wallTs(60 * 26),
       last_settled_minor: env === "live" ? "5230000" : "120000",
-      last_settled_at: tsAt(-60 * 22),
+      last_settled_at: wallTs(-60 * 22),
     },
     recent_intents: mine.slice(0, 10),
   };

@@ -47,9 +47,10 @@ function sha(key: string): string {
 
 // Seed epoch: anchored once per process to the current UTC hour so relative
 // offsets stay deterministic inside a replica (IDs, trend points, row times).
-// AgeBadge + session clocks use wall-clock helpers below — a long-lived
-// Railway replica must not paint multi-hour "5h old" or mint already-expired
-// sessions eight hours after boot (afternoon demo risk).
+// AgeBadge, session clocks, and dashboard row freshness (last_health_at,
+// settlement release windows) use wall-clock helpers below — a long-lived
+// Railway replica must not paint multi-hour "5h old", mint already-expired
+// sessions, or show yesterday's last-health next to a "2m old" AgeBadge.
 function demoSnapshotAt(): string {
   const d = new Date();
   d.setUTCMinutes(0, 0, 0);
@@ -900,13 +901,15 @@ export function settlementDashboard(): SettlementDashboard {
       { state: "RETURNED", count: 14, amount_minor: "9120000" },
     ],
     open_batches: 6,
-    earliest_release_at: tsAt(120),
-    latest_release_at: tsAt(60 * 24 * 3),
+    earliest_release_at: new Date(Date.now() + 120 * 60_000).toISOString().replace(".000Z", "Z"),
+    latest_release_at: new Date(Date.now() + 60 * 24 * 3 * 60_000).toISOString().replace(".000Z", "Z"),
     working_day_deadline_breaches: 0,
   };
 }
 
 export function connectorsDashboard(): ConnectorsDashboard {
+  // last_health_at must track wall clock like as_of — boot-frozen tsAt(-2)
+  // otherwise AgeBadge says "2m old" while the column shows yesterday.
   return {
     as_of: asOfMinutesAgo(2),
     connectors: connectors.map((c) => ({
@@ -915,7 +918,7 @@ export function connectorsDashboard(): ConnectorsDashboard {
       active_mode: c.active_mode,
       health_status: c.health_status,
       circuit_state: c.circuit_state,
-      last_health_at: c.last_health_at,
+      last_health_at: asOfMinutesAgo(2),
     })),
   };
 }
