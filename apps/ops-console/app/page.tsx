@@ -21,7 +21,7 @@ import type {
   SlaDashboard,
   TcsaDashboard,
 } from "@/lib/api/types";
-import { formatBdt } from "@/lib/format";
+import { formatBdt, formatTs } from "@/lib/format";
 import { useLang } from "@/lib/i18n/LangContext";
 
 export default function DashboardPage() {
@@ -113,8 +113,9 @@ export default function DashboardPage() {
                 </tbody>
               </table>
               <p className="subtle">
-                Open batches: {settlement.open_batches} · earliest release {settlement.earliest_release_at} · latest{" "}
-                {settlement.latest_release_at} · 5-working-day deadline breaches: {settlement.working_day_deadline_breaches}
+                Open batches: {settlement.open_batches} · earliest release {formatTs(settlement.earliest_release_at)} ·
+                latest {formatTs(settlement.latest_release_at)} · 5-working-day deadline breaches:{" "}
+                {settlement.working_day_deadline_breaches}
               </p>
             </>
           ) : (
@@ -154,7 +155,7 @@ export default function DashboardPage() {
                   <td>
                     <StateBadge value={c.circuit_state} circuit />
                   </td>
-                  <td className="subtle">{c.last_health_at}</td>
+                  <td className="subtle">{formatTs(c.last_health_at)}</td>
                 </tr>
               ))}
             </tbody>

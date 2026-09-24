@@ -17,9 +17,10 @@ import { hasValidDinerSession } from "@/lib/mock/session";
 // --- per-app public allow-list ----------------------------------------------
 // Browse (/ and /browse alias) and merchant detail (/merchants/*) are public
 // so diners can discover deals before signing in. Login stays public;
-// pay/history stay gated. Public discovery (EatClub-style) before login.
+// /pay is a public alias that redirects to home; history stays gated.
+// Public discovery (EatClub-style) before login.
 // Redemption still requires a session (API-enforced on reserve/pay).
-const PUBLIC_EXACT = ["/", "/login", "/browse"];
+const PUBLIC_EXACT = ["/", "/login", "/browse", "/pay"];
 const PUBLIC_PREFIXES: string[] = ["/merchants", "/data"];
 
 export const proxy = createEdgeProxy({
