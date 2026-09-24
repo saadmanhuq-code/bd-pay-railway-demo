@@ -120,3 +120,5 @@ export function maskBdMobile(msisdn: string): string {
   // PII posture: never render the full number back; keep last 3 digits.
   return msisdn.length >= 11 ? `01•••••••${msisdn.slice(-3)}` : "01•••";
 }
+
+// fe-qa deploy poke 20260924T015830Z

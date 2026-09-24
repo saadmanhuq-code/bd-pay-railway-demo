@@ -67,3 +67,5 @@ export function ageLabel(iso: string): string {
   if (h < 48) return `${h}h old`;
   return `${Math.floor(h / 24)}d old`;
 }
+
+// fe-qa deploy poke 20260924T015830Z
