@@ -68,4 +68,5 @@ export function ageLabel(iso: string): string {
   return `${Math.floor(h / 24)}d old`;
 }
 
-// fe-qa deploy poke 20260924T015830Z
+
+// fe-qa deploy poke 20260924T1235AsiaDhaka afternoon

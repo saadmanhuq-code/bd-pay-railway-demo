@@ -121,4 +121,5 @@ export function maskBdMobile(msisdn: string): string {
   return msisdn.length >= 11 ? `01•••••••${msisdn.slice(-3)}` : "01•••";
 }
 
-// fe-qa deploy poke 20260924T015830Z
+
+// fe-qa deploy poke 20260924T1235AsiaDhaka afternoon
