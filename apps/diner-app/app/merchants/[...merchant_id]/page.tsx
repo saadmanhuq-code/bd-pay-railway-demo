@@ -8,7 +8,7 @@
 // no mid-flow repricing, ever. The client-side discount preview is display
 // only; the server is authoritative (same floor math via the shared engine).
 
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import {
@@ -76,6 +76,10 @@ export default function MerchantOffersPage() {
 
   const [demoAmountRaw, setDemoAmountRaw] = useState("");
   const [demoSuccess, setDemoSuccess] = useState<DinerPayResult | null>(null);
+  const demoSuccessRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    if (demoSuccess) demoSuccessRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+  }, [demoSuccess]);
   const [source, setSource] = useState<"api" | "demo" | "osm">("api");
 
   const load = useCallback(() => {
@@ -505,7 +509,7 @@ export default function MerchantOffersPage() {
               <p className="error-text">{t("redeem_amount_invalid")}</p>
             ) : null}
             {demoSuccess ? (
-              <div className="notice notice-good">
+              <div className="notice notice-good" ref={demoSuccessRef} role="status">
                 <p>{t("demo_pay_success")}</p>
                 <Link className="btn btn-block" href="/history">
                   {t("receipt_view_history")}

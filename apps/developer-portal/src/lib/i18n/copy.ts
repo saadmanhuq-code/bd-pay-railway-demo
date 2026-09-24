@@ -339,8 +339,18 @@ export const COPY = {
     en: "Windows are Asia/Dhaka local time (no DST). Start is inclusive, end is exclusive. At most 7 rows; overlapping windows on the same day are rejected.",
     bn: "সময়সীমা ঢাকা (Asia/Dhaka) স্থানীয় সময়ে (ডিএসটি নেই)। শুরু অন্তর্ভুক্ত, শেষ বহির্ভূত। সর্বোচ্চ ৭টি সারি; একই দিনে ওভারল্যাপ করা সময়সীমা প্রত্যাখ্যাত হয়।",
   },
-  offer_valid_from: { en: "Valid from (UTC)", bn: "কার্যকর শুরু (ইউটিসি)" },
-  offer_valid_until: { en: "Valid until (UTC)", bn: "কার্যকর শেষ (ইউটিসি)" },
+  offer_valid_from: { en: "Valid from (Asia/Dhaka)", bn: "কার্যকর শুরু (ঢাকা)" },
+  pay_index_title: { en: "Payment link required", bn: "পেমেন্ট লিংক প্রয়োজন" },
+  pay_index_body: {
+    en: "This path is not a checkout. Open a payment link your merchant shared — it looks like /pay/l/… — or create one from Payment links when signed in.",
+    bn: "এই পথটি চেকআউট নয়। মার্চেন্টের শেয়ার করা পেমেন্ট লিংক খুলুন — যেমন /pay/l/… — অথবা সাইন ইন করে Payment links থেকে একটি তৈরি করুন।",
+  },
+  pay_index_hint: {
+    en: "Hosted checkout URLs are /pay/l/{public_code}.",
+    bn: "হোস্টেড চেকআউট URL: /pay/l/{public_code}।",
+  },
+  pay_index_cta: { en: "Go to Payment links", bn: "পেমেন্ট লিংকে যান" },
+  offer_valid_until: { en: "Valid until (Asia/Dhaka)", bn: "কার্যকর শেষ (ঢাকা)" },
   offer_validity_note: {
     en: "Validity range is capped at 366 days.",
     bn: "কার্যকর মেয়াদ সর্বোচ্চ ৩৬৬ দিন।",

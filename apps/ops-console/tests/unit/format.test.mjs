@@ -21,8 +21,9 @@ test("formatBdt refuses non-integer amounts (floats banned)", () => {
   assert.throws(() => formatBdt(10.5));
 });
 
-test("formatTs renders a UTC-suffixed space-separated timestamp, or an em dash for none", () => {
-  assert.equal(formatTs("2026-03-15T12:30:00.000Z"), "2026-03-15 12:30:00 UTC");
+test("formatTs renders Asia/Dhaka wall time (UTC+6), or an em dash for none", () => {
+  // 12:30Z → 18:30 Asia/Dhaka
+  assert.equal(formatTs("2026-03-15T12:30:00.000Z"), "2026-03-15 18:30:00 Asia/Dhaka");
   assert.equal(formatTs(null), "—");
   assert.equal(formatTs(undefined), "—");
 });

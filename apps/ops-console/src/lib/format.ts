@@ -35,7 +35,18 @@ function groupThousands(digits: string): string {
 
 export function formatTs(iso: string | null | undefined): string {
   if (!iso) return "—";
-  return iso.replace("T", " ").replace(/\.\d+Z$/, "Z").replace("Z", " UTC");
+  const ms = Date.parse(iso);
+  if (!Number.isFinite(ms)) return "—";
+  // Bangladesh Standard Time is fixed UTC+6 (no DST). Show local wall time
+  // for BD operators/diners — raw "… UTC" was a client wayfinding bug.
+  const d = new Date(ms + 6 * 3_600_000);
+  const y = d.getUTCFullYear();
+  const mo = String(d.getUTCMonth() + 1).padStart(2, "0");
+  const da = String(d.getUTCDate()).padStart(2, "0");
+  const hh = String(d.getUTCHours()).padStart(2, "0");
+  const mm = String(d.getUTCMinutes()).padStart(2, "0");
+  const ss = String(d.getUTCSeconds()).padStart(2, "0");
+  return `${y}-${mo}-${da} ${hh}:${mm}:${ss} Asia/Dhaka`;
 }
 
 export function shortId(id: string, keep = 14): string {
