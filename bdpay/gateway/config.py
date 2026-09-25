@@ -18,9 +18,43 @@ from bdpay.platform.deployment_env import (
     deployment_is_production,
 )
 
-__all__ = ["GatewaySettings", "GatewayCredentialError"]
+__all__ = [
+    "DEPLOY_ID_ENV_KEYS",
+    "RUNTIME_SHA_ENV_KEYS",
+    "GatewaySettings",
+    "GatewayCredentialError",
+]
 
 _RATE_LIMIT_MODES = ("enforce", "shadow")
+
+# Health running-sha contract (portfolio-core scripts/health-contract.ts): the
+# health body carries the git sha the running build was compiled from and the
+# deploy/build id, read from the first host-injected env var present. Railway is
+# bd-pay's documented host (deploy/railway), so its variables are included.
+RUNTIME_SHA_ENV_KEYS = (
+    "RUNTIME_SHA",
+    "RAILWAY_GIT_COMMIT_SHA",
+    "VERCEL_GIT_COMMIT_SHA",
+    "GIT_COMMIT_SHA",
+    "GITHUB_SHA",
+    "CI_COMMIT_SHA",
+    "SOURCE_COMMIT",
+)
+DEPLOY_ID_ENV_KEYS = (
+    "DEPLOY_ID",
+    "RAILWAY_DEPLOYMENT_ID",
+    "VERCEL_DEPLOYMENT_ID",
+    "CI_PIPELINE_ID",
+    "BUILD_ID",
+)
+
+
+def _first_env(source: Mapping[str, str], keys: tuple[str, ...]) -> str | None:
+    for key in keys:
+        value = (source.get(key) or "").strip()
+        if value:
+            return value
+    return None
 
 _WEAK_JWT_SECRETS = frozenset({"", "dev-jwt-secret-32chars!!", "changeme", "secret", "test"})
 _WEAK_HMAC_KEYS = frozenset({"ab" * 32, "00" * 32, "ff" * 32, "de" * 32, "cd" * 32})
@@ -61,6 +95,8 @@ class GatewaySettings:
     max_request_body_bytes: int = 1_048_576  # 1 MiB edge request-body cap
     request_id_seed: str = ""
     cors_allowed_origins: tuple[str, ...] = ()
+    runtime_sha: str | None = None  # running build's git sha (health contract)
+    deploy_id: str | None = None  # deploy/build id (health contract)
     # Informational only (served on ``GET /``); never secrets.
     connector_mode: str = "simulator"
     deployment_env: str = ""
@@ -159,6 +195,8 @@ class GatewaySettings:
             kwargs["cors_allowed_origins"] = tuple(
                 origin.strip() for origin in origins.split(",") if origin.strip()
             )
+        kwargs["runtime_sha"] = _first_env(source, RUNTIME_SHA_ENV_KEYS)
+        kwargs["deploy_id"] = _first_env(source, DEPLOY_ID_ENV_KEYS)
         if is_production:
             if int(kwargs.get("bcrypt_rounds", cls.bcrypt_rounds)) < 12:
                 raise GatewayCredentialError(
@@ -177,7 +215,7 @@ class GatewaySettings:
         env_ok = bdpay_env.replace("-", "").replace("_", "").isalnum()
         kwargs["deployment_env"] = bdpay_env if env_ok else ""
         commit = (
-            source.get("BDPAY_BUILD_COMMIT") or source.get("RAILWAY_GIT_COMMIT_SHA") or ""
+            source.get("BDPAY_BUILD_COMMIT") or _first_env(source, RUNTIME_SHA_ENV_KEYS) or ""
         ).strip().lower()
         commit_ok = bool(commit) and all(c in "0123456789abcdef" for c in commit)
         kwargs["build_commit"] = commit[:12] if commit_ok else ""

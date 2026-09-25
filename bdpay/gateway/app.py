@@ -2680,7 +2680,16 @@ def create_app(deps: GatewayDependencies) -> FastAPI:
         return JSONResponse(body)
 
     async def health(request: Request) -> Response:
-        return JSONResponse({"status": "ok", "timestamp": rfc3339(deps.clock.now())})
+        # runtime_sha/deploy_id: the health running-sha contract the portfolio
+        # freshness probe reconciles against the default-branch HEAD.
+        return JSONResponse(
+            {
+                "status": "ok",
+                "timestamp": rfc3339(deps.clock.now()),
+                "runtime_sha": deps.settings.runtime_sha,
+                "deploy_id": deps.settings.deploy_id,
+            }
+        )
 
     async def ready(request: Request) -> Response:
         checks: dict[str, str] = {}

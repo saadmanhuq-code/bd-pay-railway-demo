@@ -191,7 +191,7 @@ from bdpay.connectors.stores import (
 from bdpay.gateway.apikeys import ApiKeyService, InMemoryApiKeyRepository
 from bdpay.gateway.app import GatewayDependencies
 from bdpay.gateway.app import create_app as _create_gateway_app
-from bdpay.gateway.config import GatewaySettings
+from bdpay.gateway.config import DEPLOY_ID_ENV_KEYS, RUNTIME_SHA_ENV_KEYS, GatewaySettings
 from bdpay.gateway.credentials import encrypt_blob
 from bdpay.gateway.customers import InMemoryCustomerService, PostgresCustomerService
 from bdpay.gateway.event_fanout import (
@@ -4693,8 +4693,9 @@ def build_services(settings: Settings, clock: Clock) -> ServiceContainer:  # noq
         # Informational labels for the GET / service card (no secrets).
         "CONNECTOR_MODE",
         "BDPAY_BUILD_COMMIT",
-        "RAILWAY_GIT_COMMIT_SHA",
         "BDPAY_PORTAL_URL",
+        *RUNTIME_SHA_ENV_KEYS,
+        *DEPLOY_ID_ENV_KEYS,
     ):
         if _env_name in os.environ:
             gateway_env[_env_name] = os.environ[_env_name]
