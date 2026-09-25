@@ -450,6 +450,15 @@ export function createPublicIntentMock(
     }
   }
   if (rec.single_use && openIntentByLink.has(rec.payment_link_id)) {
+    // Mirrors the engine's content-addressed server idempotency key: the SAME
+    // payer inputs replay the open checkout (e.g. the payer refreshed or came
+    // back from the authorisation step) instead of stranding them on a 409.
+    const openId = openIntentByLink.get(rec.payment_link_id)!;
+    const open = publicIntents.get(openId);
+    const replay = publicIntentResults.get(openId);
+    if (open && replay && open.status === "REQUIRES_ACTION" && open.method === method && BigInt(open.amount_minor) === amount) {
+      return ok(replay, 200);
+    }
     return mockError("conflict", "link_not_payable", "A payment is already in progress for this single-use link.");
   }
   linkSeq += 1;
@@ -488,6 +497,7 @@ export function createPublicIntentMock(
     status: "REQUIRES_ACTION",
     updated_at: at,
   });
+  publicIntentResults.set(intentId, result);
   return ok(result, 201);
 }
 
@@ -508,6 +518,7 @@ interface PublicIntentRec {
 }
 
 const publicIntents = new Map<string, PublicIntentRec>();
+const publicIntentResults = new Map<string, PublicLinkIntentResult>();
 
 export function getPublicIntentMock(code: string, intentId: string): MockResult<PublicIntentSimView> {
   const pi = publicIntents.get(intentId);
