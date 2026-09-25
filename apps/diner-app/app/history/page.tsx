@@ -24,6 +24,15 @@ const STATE_KEYS: Record<RedemptionState, CopyKey> = {
   SETTLED: "state_SETTLED",
 };
 
+const STATUS_KEYS: Record<PaymentIntentView["status"], CopyKey> = {
+  CREATED: "intent_status_CREATED",
+  SUCCEEDED: "intent_status_SUCCEEDED",
+  FAILED: "intent_status_FAILED",
+  EXPIRED: "intent_status_EXPIRED",
+  PARTIALLY_REFUNDED: "intent_status_PARTIALLY_REFUNDED",
+  REFUNDED: "intent_status_REFUNDED",
+};
+
 export default function HistoryPage() {
   const { session, loading } = useSession();
   const { lang, t } = useLang();
@@ -86,7 +95,7 @@ export default function HistoryPage() {
               ) : (
                 <div className="history-amounts">
                   <span className="net">{money(r.amount_minor)}</span>
-                  <span className="subtle">{r.status}</span>
+                  <span className="subtle">{t(STATUS_KEYS[r.status])}</span>
                 </div>
               )}
             </div>

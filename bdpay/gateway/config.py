@@ -61,6 +61,11 @@ class GatewaySettings:
     max_request_body_bytes: int = 1_048_576  # 1 MiB edge request-body cap
     request_id_seed: str = ""
     cors_allowed_origins: tuple[str, ...] = ()
+    # Informational only (served on ``GET /``); never secrets.
+    connector_mode: str = "simulator"
+    deployment_env: str = ""
+    build_commit: str = ""
+    portal_url: str = ""
 
     def __post_init__(self) -> None:
         if not self.jwt_secret:
@@ -165,6 +170,14 @@ class GatewaySettings:
                     "GATEWAY_RATE_LIMIT_MODE=shadow is not allowed in production; "
                     f"refusing to boot (BDPAY_ENV={env_label!r})"
                 )
+        connector_mode = (source.get("CONNECTOR_MODE") or "simulator").strip().lower()
+        kwargs["connector_mode"] = connector_mode if connector_mode.isalnum() else "unknown"
+        bdpay_env = (source.get("BDPAY_ENV") or "").strip().lower()
+        kwargs["deployment_env"] = bdpay_env if bdpay_env.replace("-", "").replace("_", "").isalnum() else ""
+        commit = (source.get("BDPAY_BUILD_COMMIT") or source.get("RAILWAY_GIT_COMMIT_SHA") or "").strip().lower()
+        kwargs["build_commit"] = commit[:12] if commit and all(c in "0123456789abcdef" for c in commit) else ""
+        portal = (source.get("BDPAY_PORTAL_URL") or "").strip()
+        kwargs["portal_url"] = portal if portal.startswith("https://") and " " not in portal else ""
         return cls(
             jwt_secret=jwt_secret,
             hmac_master_key_hex=master,

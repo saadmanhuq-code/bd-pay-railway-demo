@@ -47,9 +47,13 @@ export function createTotpModal<TCopyKey extends string>({
           <h3>
             <DualLabel k={titleKey} />
           </h3>
-          <p className="modal-message">
-            <DualLabel k={messageKey} />
-          </p>
+          {/* The TOTP field below always carries the totp_prompt label, so a
+              messageKey of totp_prompt would render the same sentence twice. */}
+          {messageKey === "totp_prompt" ? null : (
+            <p className="modal-message">
+              <DualLabel k={messageKey} />
+            </p>
+          )}
           {withReason ? (
             <label className="field">
               <span>{t("reason")}</span>

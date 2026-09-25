@@ -4687,7 +4687,15 @@ def build_services(settings: Settings, clock: Clock) -> ServiceContainer:  # noq
         "BDPAY_ENV": os.environ.get("BDPAY_ENV", ""),
         "VAULT_ENV": os.environ.get("VAULT_ENV", ""),
     }
-    for _env_name in ("GATEWAY_BCRYPT_ROUNDS", "GATEWAY_RATE_LIMIT_MODE"):
+    for _env_name in (
+        "GATEWAY_BCRYPT_ROUNDS",
+        "GATEWAY_RATE_LIMIT_MODE",
+        # Informational labels for the GET / service card (no secrets).
+        "CONNECTOR_MODE",
+        "BDPAY_BUILD_COMMIT",
+        "RAILWAY_GIT_COMMIT_SHA",
+        "BDPAY_PORTAL_URL",
+    ):
         if _env_name in os.environ:
             gateway_env[_env_name] = os.environ[_env_name]
     gw_settings = GatewaySettings.from_env(gateway_env)

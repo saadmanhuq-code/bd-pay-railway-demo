@@ -2652,6 +2652,33 @@ def create_app(deps: GatewayDependencies) -> FastAPI:
 
     # -- system -----------------------------------------------------------------------------
 
+    async def root(request: Request) -> Response:
+        # Honest service card for a bare GET / (previously an unrouted 404).
+        # Informational only: no secrets, no config beyond mode/env labels.
+        cfg = deps.settings
+        simulated = cfg.connector_mode != "live"
+        body: dict[str, object] = {
+            "service": "BD Pay gateway",
+            "mode": cfg.connector_mode,
+            "environment": cfg.deployment_env or None,
+            "simulated_money": simulated,
+            "notice": (
+                "Simulator / sandbox — no real money moves."
+                if simulated
+                else "Live connector mode."
+            ),
+            "api_version": "v1",
+            "commit": cfg.build_commit or None,
+            "links": {
+                "health": "/healthz",
+                "ready": "/v1/ready",
+                "openapi": "/v1/openapi.json",
+                "developer_portal": cfg.portal_url or None,
+            },
+            "timestamp": rfc3339(deps.clock.now()),
+        }
+        return JSONResponse(body)
+
     async def health(request: Request) -> Response:
         return JSONResponse({"status": "ok", "timestamp": rfc3339(deps.clock.now())})
 
@@ -2854,6 +2881,7 @@ def create_app(deps: GatewayDependencies) -> FastAPI:
     )
     app.add_api_route("/v1/qr/dashboard", qr_dashboard, methods=["GET"])
     app.add_api_route("/v1/webhooks/{connector_id}", inbound_webhook, methods=["POST"])
+    app.add_api_route("/", root, methods=["GET"])
     app.add_api_route("/v1/health", health, methods=["GET"])
     app.add_api_route("/healthz", health, methods=["GET"])
     app.add_api_route("/v1/ready", ready, methods=["GET"])

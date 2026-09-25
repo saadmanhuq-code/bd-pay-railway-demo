@@ -418,6 +418,20 @@ export const COPY = {
     bn: "আগে একটি রেস্তোরাঁর অফার খুলুন, তারপর ট্যাপ-টু-পে সিমুলেট করতে এখানে ফিরে আসুন।",
   },
   wallet_pick_offer: { en: "Paying at", bn: "পেমেন্ট করছেন" },
+  wallet_tap_full_bill: {
+    en: "no discount; the simulator charges the full bill.",
+    bn: "ছাড় ছাড়া; সিমুলেটরে পুরো বিল নেওয়া হবে।",
+  },
+  wallet_tap_success_plain: {
+    en: "Tap successful — simulated payment recorded.",
+    bn: "ট্যাপ সফল — সিমুলেটেড পেমেন্ট রেকর্ড হয়েছে।",
+  },
+  intent_status_CREATED: { en: "Awaiting payment", bn: "পেমেন্টের অপেক্ষায়" },
+  intent_status_SUCCEEDED: { en: "Paid (simulated)", bn: "পেমেন্ট সফল (সিমুলেটেড)" },
+  intent_status_FAILED: { en: "Payment failed", bn: "পেমেন্ট ব্যর্থ" },
+  intent_status_EXPIRED: { en: "Expired", bn: "মেয়াদোত্তীর্ণ" },
+  intent_status_PARTIALLY_REFUNDED: { en: "Partially refunded", bn: "আংশিক ফেরত" },
+  intent_status_REFUNDED: { en: "Refunded", bn: "ফেরত দেওয়া হয়েছে" },
   sort_nearby: { en: "Sorted by distance", bn: "দূরত্ব অনুসারে সাজানো" },
 
 } as const;

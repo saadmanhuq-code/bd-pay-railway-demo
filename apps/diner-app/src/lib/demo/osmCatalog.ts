@@ -101,7 +101,7 @@ const OFFER_TEMPLATES: Array<{
     percent_bps: 2000,
     windows: [
       {
-        days: ["MON", "TUE", "WED", "THU", "FRI"],
+        days: ["SUN", "MON", "TUE", "WED", "THU"],
         start_local: "14:30",
         end_local: "17:30",
       },
@@ -138,7 +138,7 @@ const OFFER_TEMPLATES: Array<{
     title: "Weekend 30% off (demo terms)",
     title_bn: "উইকেন্ড ৩০% ছাড় (ডেমো শর্ত)",
     percent_bps: 3000,
-    windows: [{ days: ["SAT", "SUN"], start_local: "12:00", end_local: "22:00" }],
+    windows: [{ days: ["FRI", "SAT"], start_local: "12:00", end_local: "22:00" }],
     min_spend_minor: 60000,
     max_discount_minor: 40000,
   },

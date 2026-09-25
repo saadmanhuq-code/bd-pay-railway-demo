@@ -648,6 +648,15 @@ def build_policies() -> tuple[RoutePolicy, ...]:
         ),
         # -- health / metrics ----------------------------------------------------
         RoutePolicy(
+            name="system.root",
+            method="GET",
+            pattern=re.compile(r"^/$"),
+            route_group="system",
+            public=True,
+            ip_limit_per_minute=600,
+            skip_auth=True,
+        ),
+        RoutePolicy(
             name="system.health",
             method="GET",
             pattern=re.compile(r"^/(v1/health|healthz)$"),

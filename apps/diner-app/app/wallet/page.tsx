@@ -9,11 +9,12 @@ import { useSearchParams } from "next/navigation";
 import { ApiError, demoDinerPay } from "@/lib/api/client";
 import type { DinerPayResult, EligibleOffer } from "@/lib/api/types";
 import { discoverMerchantOffers } from "@/lib/demo/discover";
-import { computeDiscountMinor } from "@/lib/offers/engine";
+import { computeDiscountMinor, windowMatches } from "@/lib/offers/engine";
 import { formatBdt, formatBdtBn } from "@/lib/format";
 import { useSession } from "@/lib/useSession";
 import { useLang } from "@/lib/i18n/LangContext";
 import { Shell } from "@/components/Shell";
+import { REASON_COPY } from "@/lib/i18n/copy";
 
 function money(lang: "bn" | "en", minor: number): string {
   return lang === "bn" ? formatBdtBn(minor) : formatBdt(minor);
@@ -55,8 +56,16 @@ function WalletInner() {
       .catch(() => undefined);
   }, [merchantId, offerId, lang]);
 
+  // Offer hours are evaluated at the wall clock, exactly like reserve: outside
+  // the window the simulator charges the full bill instead of silently
+  // applying a discount the offer would refuse.
+  const offerLive = useMemo(
+    () => (offer ? windowMatches(offer.windows, new Date().toISOString()) : false),
+    [offer],
+  );
+
   const preview = useMemo(() => {
-    if (!offer || offer.percent_bps === null) return null;
+    if (!offer || offer.percent_bps === null || !offerLive) return null;
     if (DEMO_BILL_MINOR < offer.min_spend_minor) return null;
     try {
       const discount = computeDiscountMinor(
@@ -68,7 +77,7 @@ function WalletInner() {
     } catch {
       return null;
     }
-  }, [offer]);
+  }, [offer, offerLive]);
 
   const last4 = session ? last4FromCustomerId(session.customer.customer_id) : "0000";
 
@@ -160,6 +169,11 @@ function WalletInner() {
         ) : (
           <p className="notice">{t("wallet_tap_need_merchant")}</p>
         )}
+        {offer && !offerLive ? (
+          <p className="notice" role="status">
+            {REASON_COPY.OUTSIDE_WINDOW[lang]} — {t("wallet_tap_full_bill")}
+          </p>
+        ) : null}
         {preview ? (
           <dl className="kv">
             <dt>{t("redeem_gross")}</dt>
@@ -173,7 +187,7 @@ function WalletInner() {
 
         {phase === "done" && result ? (
           <div className="notice notice-good">
-            <p>{t("wallet_tap_success")}</p>
+            <p>{preview ? t("wallet_tap_success") : t("wallet_tap_success_plain")}</p>
             <p className="mono subtle">{result.payment_intent_id}</p>
             <Link className="btn btn-block" href="/history">
               {t("receipt_view_history")}
