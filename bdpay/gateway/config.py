@@ -170,14 +170,20 @@ class GatewaySettings:
                     "GATEWAY_RATE_LIMIT_MODE=shadow is not allowed in production; "
                     f"refusing to boot (BDPAY_ENV={env_label!r})"
                 )
+        # Informational labels for the GET / service card; sanitised, no secrets.
         connector_mode = (source.get("CONNECTOR_MODE") or "simulator").strip().lower()
         kwargs["connector_mode"] = connector_mode if connector_mode.isalnum() else "unknown"
         bdpay_env = (source.get("BDPAY_ENV") or "").strip().lower()
-        kwargs["deployment_env"] = bdpay_env if bdpay_env.replace("-", "").replace("_", "").isalnum() else ""
-        commit = (source.get("BDPAY_BUILD_COMMIT") or source.get("RAILWAY_GIT_COMMIT_SHA") or "").strip().lower()
-        kwargs["build_commit"] = commit[:12] if commit and all(c in "0123456789abcdef" for c in commit) else ""
+        env_ok = bdpay_env.replace("-", "").replace("_", "").isalnum()
+        kwargs["deployment_env"] = bdpay_env if env_ok else ""
+        commit = (
+            source.get("BDPAY_BUILD_COMMIT") or source.get("RAILWAY_GIT_COMMIT_SHA") or ""
+        ).strip().lower()
+        commit_ok = bool(commit) and all(c in "0123456789abcdef" for c in commit)
+        kwargs["build_commit"] = commit[:12] if commit_ok else ""
         portal = (source.get("BDPAY_PORTAL_URL") or "").strip()
-        kwargs["portal_url"] = portal if portal.startswith("https://") and " " not in portal else ""
+        portal_ok = portal.startswith("https://") and " " not in portal
+        kwargs["portal_url"] = portal if portal_ok else ""
         return cls(
             jwt_secret=jwt_secret,
             hmac_master_key_hex=master,
