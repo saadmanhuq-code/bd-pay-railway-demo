@@ -204,7 +204,16 @@ export default function MerchantOffersPage() {
     }
   }
 
-  function refusalCopy(code: string): { bn: string; en: string } | null {
+  function refusalCopy(code: string, message = ""): { bn: string; en: string } | null {
+    // offer_not_eligible carries the engine ReasonCode(s) in the message
+    // ("offer_not_eligible: OUTSIDE_WINDOW") — prefer the specific kernel copy
+    // (e.g. outside offer hours) over the generic "cannot be applied".
+    if (code === "offer_not_eligible") {
+      const reason = (Object.keys(REASON_COPY) as (keyof typeof REASON_COPY)[]).find((r) =>
+        message.includes(r),
+      );
+      if (reason) return { bn: REASON_COPY[reason].bn, en: REASON_COPY[reason].en };
+    }
     if (code in REFUSAL_COPY) {
       const bi = REFUSAL_COPY[code as keyof typeof REFUSAL_COPY];
       return { bn: bi.bn, en: bi.en };
@@ -316,10 +325,10 @@ export default function MerchantOffersPage() {
           </p>
           {refusal ? (
             <p className="error-text">
-              {refusalCopy(refusal.code)
+              {refusalCopy(refusal.code, refusal.message)
                 ? lang === "bn"
-                  ? refusalCopy(refusal.code)!.bn
-                  : refusalCopy(refusal.code)!.en
+                  ? refusalCopy(refusal.code, refusal.message)!.bn
+                  : refusalCopy(refusal.code, refusal.message)!.en
                 : refusal.message}
             </p>
           ) : null}
@@ -470,10 +479,10 @@ export default function MerchantOffersPage() {
 
               {refusal ? (
                 <p className="error-text">
-                  {refusalCopy(refusal.code)
+                  {refusalCopy(refusal.code, refusal.message)
                     ? lang === "bn"
-                      ? refusalCopy(refusal.code)!.bn
-                      : refusalCopy(refusal.code)!.en
+                      ? refusalCopy(refusal.code, refusal.message)!.bn
+                      : refusalCopy(refusal.code, refusal.message)!.en
                     : refusal.message}
                 </p>
               ) : null}
@@ -518,20 +527,29 @@ export default function MerchantOffersPage() {
             ) : null}
             {refusal && !selected ? (
               <p className="error-text">
-                {refusalCopy(refusal.code)
+                {refusalCopy(refusal.code, refusal.message)
                   ? lang === "bn"
-                    ? refusalCopy(refusal.code)!.bn
-                    : refusalCopy(refusal.code)!.en
+                    ? refusalCopy(refusal.code, refusal.message)!.bn
+                    : refusalCopy(refusal.code, refusal.message)!.en
                   : refusal.message}
               </p>
             ) : null}
-            <button
-              className="btn btn-primary btn-block"
-              disabled={busy || demoMinor === null}
-              onClick={() => void onDemoPay()}
-            >
-              {busy ? t("demo_pay_busy") : t("demo_pay_button")}
-            </button>
+            {session ? (
+              <button
+                className="btn btn-primary btn-block"
+                disabled={busy || demoMinor === null}
+                onClick={() => void onDemoPay()}
+              >
+                {busy ? t("demo_pay_busy") : t("demo_pay_button")}
+              </button>
+            ) : (
+              <Link
+                className="btn btn-primary btn-block"
+                href={`/login?next=${encodeURIComponent(`/merchants/${merchantId}`)}`}
+              >
+                {t("sign_in")}
+              </Link>
+            )}
           </section>
         </>
       )}

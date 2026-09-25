@@ -39,9 +39,17 @@ function tsAt(offsetMinutes: number): string {
 }
 
 let offerSeq = 0;
+// Mutation clock = WALL clock (second resolution, strictly monotonic so two
+// mutations in the same second still order). The seed epoch is anchored at
+// process boot, so a long-lived Railway replica previously stamped "just now"
+// actions (approve, create key, add webhook, link expiry…) with the boot hour
+// — e.g. an approval decided today showed yesterday 12:30.
+let lastMutationMs = 0;
 function mutationTs(): string {
   offerSeq += 1;
-  return new Date(EPOCH_MS + 50 * 60_000 + offerSeq * 1000).toISOString().replace(".000Z", "Z");
+  const nowSec = Math.floor(Date.now() / 1000) * 1000;
+  lastMutationMs = Math.max(nowSec, lastMutationMs + 1000);
+  return new Date(lastMutationMs).toISOString().replace(".000Z", "Z");
 }
 
 function id(prefix: string, key: string): string {

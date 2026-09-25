@@ -122,6 +122,18 @@ export interface PublicLinkIntentResult {
   next_action?: IntentNextAction;
 }
 
+/** Sandbox payer-authorisation view for a hosted-checkout intent (mock simulator). */
+export interface PublicIntentSimView {
+  payment_intent_id: string;
+  status: "REQUIRES_ACTION" | "SUCCEEDED" | "FAILED";
+  amount_minor: number;
+  currency: "BDT";
+  method: CheckoutMethod;
+  merchant_display_name: string;
+  merchant_display_name_bn: string;
+  updated_at: string;
+}
+
 // ---------------------------------------------------------------------------
 // Sandbox signup — /v1/sandbox/signups (spec/16 §F, SANDBOX_PUBLIC only)
 // ---------------------------------------------------------------------------

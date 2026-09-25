@@ -38,6 +38,7 @@ import type {
   CertificationMatrix,
   CheckoutMethod,
   PaymentLink,
+  PublicIntentSimView,
   PublicLinkIntentResult,
   PublicPaymentLinkView,
   PublicStatusFeed,
@@ -446,6 +447,24 @@ export function createPublicLinkIntent(
     amount_minor: amountMinor,
     method,
   });
+}
+
+/** Sandbox hosted-checkout authorisation (mock simulator only). */
+export function getPublicLinkIntent(publicCode: string, paymentIntentId: string): Promise<PublicIntentSimView> {
+  return apiGet(
+    `/v1/public/payment-links/${encodeURIComponent(publicCode)}/intents/${encodeURIComponent(paymentIntentId)}`,
+  );
+}
+
+export function simulatePublicLinkIntent(
+  publicCode: string,
+  paymentIntentId: string,
+  outcome: "succeed" | "fail",
+): Promise<PublicIntentSimView> {
+  return mutate(
+    `/v1/public/payment-links/${encodeURIComponent(publicCode)}/intents/${encodeURIComponent(paymentIntentId)}/simulate`,
+    { outcome },
+  );
 }
 
 // ---------------------------------------------------------------------------

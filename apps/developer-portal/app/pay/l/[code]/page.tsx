@@ -8,7 +8,7 @@
 
 import React, { useCallback, useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import { ApiError, createPublicLinkIntent, getPublicPaymentLink } from "@/lib/api/client";
+import { ApiError, USING_MOCK_API, createPublicLinkIntent, getPublicPaymentLink } from "@/lib/api/client";
 import type { CheckoutMethod, PublicLinkIntentResult, PublicPaymentLinkView } from "@/lib/api/launchTypes";
 import { PublicShell } from "@/components/PublicShell";
 import { formatBdt, formatTs, parseAmountToMinor } from "@/lib/format";
@@ -98,7 +98,7 @@ export default function HostedCheckoutPage() {
 
   if (notFound) {
     return (
-      <PublicShell>
+      <PublicShell brandKey="checkout_brand">
         <TerminalPanel titleKey="link_not_found_title" bodyKey="link_not_found_body" />
       </PublicShell>
     );
@@ -110,15 +110,20 @@ export default function HostedCheckoutPage() {
     const bodyKey: CopyKey =
       view.state === "PAID" ? "link_paid_body" : view.state === "EXPIRED" ? "link_expired_body" : "link_cancelled_body";
     return (
-      <PublicShell>
+      <PublicShell brandKey="checkout_brand">
         <TerminalPanel titleKey={titleKey} bodyKey={bodyKey} />
       </PublicShell>
     );
   }
 
   return (
-    <PublicShell>
+    <PublicShell brandKey="checkout_brand">
       <div className="checkout-wrap">
+        {USING_MOCK_API ? (
+          <p className="notice" role="status">
+            {t("checkout_sandbox_banner")}
+          </p>
+        ) : null}
         {loadError ? <p className="error-text">{loadError}</p> : null}
         {!view && !loadError ? (
           <p>{t("loading")}</p>

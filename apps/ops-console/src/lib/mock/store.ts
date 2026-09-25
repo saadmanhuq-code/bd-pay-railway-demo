@@ -79,9 +79,17 @@ export function sessionWindow(hoursValid = 8): { issued_at: string; absolute_exp
 
 // Deterministic mutation clock: base constant + monotonic counter.
 let mutationSeq = 0;
+// Mutation clock = WALL clock (second resolution, strictly monotonic so two
+// mutations in the same second still order). The seed epoch is anchored at
+// process boot, so a long-lived Railway replica previously stamped "just now"
+// actions (approve, create key, add webhook, link expiry…) with the boot hour
+// — e.g. an approval decided today showed yesterday 12:30.
+let lastMutationMs = 0;
 function mutationTs(): string {
   mutationSeq += 1;
-  return new Date(EPOCH_MS + 30 * 60_000 + mutationSeq * 1000).toISOString().replace(".000Z", "Z");
+  const nowSec = Math.floor(Date.now() / 1000) * 1000;
+  lastMutationMs = Math.max(nowSec, lastMutationMs + 1000);
+  return new Date(lastMutationMs).toISOString().replace(".000Z", "Z");
 }
 
 const STATUS_BY_TYPE: Record<ErrorType, number> = {
@@ -843,12 +851,21 @@ export function findRecon(exceptionId: string): ReconciliationException | undefi
   return reconExceptions.find((r) => r.exception_id === exceptionId);
 }
 
+// Health probes are "live" rows: last_health_at tracks the wall clock (same
+// 2-minute cadence as the dashboard grid) instead of the boot-frozen seed —
+// otherwise /connectors showed yesterday next to a "2m old" dashboard.
+function touchHealth(c: ConnectorRegistration): ConnectorRegistration {
+  c.last_health_at = asOfMinutesAgo(2);
+  return c;
+}
+
 export function getConnectors(): ConnectorRegistration[] {
-  return connectors;
+  return connectors.map(touchHealth);
 }
 
 export function findConnector(connectorId: string): ConnectorRegistration | undefined {
-  return connectors.find((c) => c.connector_id === connectorId);
+  const c = connectors.find((x) => x.connector_id === connectorId);
+  return c ? touchHealth(c) : undefined;
 }
 
 export function getJournalEntries(): JournalEntry[] {
@@ -860,6 +877,8 @@ export function getChainEntries(): LedgerChainEntry[] {
 }
 
 export function getChainVerifyStatus(): ChainVerifyStatus {
+  // The verifier runs continuously; "last verified" is a live stamp.
+  chainVerifyStatus.last_verified_at = asOfMinutesAgo(5);
   return chainVerifyStatus;
 }
 

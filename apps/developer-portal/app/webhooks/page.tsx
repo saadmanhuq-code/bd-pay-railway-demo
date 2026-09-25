@@ -123,6 +123,10 @@ export default function WebhooksPage() {
             </label>
           ))}
         </div>
+        {url !== "https://" && url.trim() !== "" && !url.startsWith("https://") ? (
+          <p className="error-text">{t("webhook_url_https_required")}</p>
+        ) : null}
+        {events.length === 0 ? <p className="error-text">{t("webhook_events_required")}</p> : null}
         <button
           className="btn btn-primary"
           disabled={!url.startsWith("https://") || url.length < 9 || events.length === 0}

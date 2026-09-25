@@ -12,6 +12,7 @@ import type { DinerSession, Paginated, PaymentIntentView } from "@/lib/api/types
 import {
   confirmIntentMock,
   createOfferIntentMock,
+  demoDinerPayMock,
   eligibleOffersMock,
   getDemoCustomer,
   getIntentMock,
@@ -236,6 +237,17 @@ export async function POST(req: NextRequest, ctx: Ctx): Promise<NextResponse> {
 
   if (p[1] === "qr-codes" && p[2] === "dynamic" && p.length === 3) {
     return json(issueDynamicQrMock(str("payment_intent_id")));
+  }
+
+  if (p[1] === "sandbox" && p[2] === "demo" && p[3] === "diner-pay" && p.length === 4) {
+    return json(
+      demoDinerPayMock({
+        idempotencyKey: idem,
+        merchant_id: str("merchant_id"),
+        amount_minor: body["amount_minor"],
+        payment_method: str("payment_method"),
+      }),
+    );
   }
 
   return json(mockError("not_found", "unknown_route", "Unknown mock route."));

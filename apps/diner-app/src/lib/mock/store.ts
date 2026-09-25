@@ -1,4 +1,5 @@
 import { tagsForWindows } from "@/lib/demo/windowTags";
+import { getDemoMerchant, isLocalCatalogMerchantId, listDemoOffers } from "@/lib/demo/catalog";
 // In-app deterministic mock state for the diner-app. All seed data derives
 // from fixed constants — no Math.random / Date.now anywhere in the data path
 // (the developer-portal/ops-console mock pattern). The clock is the fixed
@@ -503,6 +504,80 @@ function findOffer(offerId: string): OfferRecord | undefined {
 }
 
 // ---------------------------------------------------------------------------
+// Public catalog bridge — the browse/merchant pages list the local catalog
+// (hand-seeded demo_mrch_* rows + the OSM Dhaka cache). Without this bridge
+// every reserve / one-tap pay from those pages 404'd "No such merchant.".
+// Catalog offers are evaluated against the WALL clock (Asia/Dhaka), because
+// their offer hours are shown to the diner as real local hours; the fixed
+// SNAPSHOT_AT instant stays for the deterministic mrch_* fixtures above.
+// ---------------------------------------------------------------------------
+
+const CATALOG_VALID_FROM = "2026-06-01T00:00:00Z";
+
+function resolveMerchant(merchantId: string): MerchantRecord | undefined {
+  const seeded = findMerchant(merchantId);
+  if (seeded) return seeded;
+  if (!isLocalCatalogMerchantId(merchantId)) return undefined;
+  const m = getDemoMerchant(merchantId);
+  if (!m) return undefined;
+  return {
+    key: m.merchant_id,
+    merchant_id: m.merchant_id,
+    display_name: m.display_name,
+    display_name_bn: m.display_name_bn,
+    area: m.area,
+    area_bn: m.area_bn,
+    cuisine: m.cuisine,
+    cuisine_bn: m.cuisine_bn,
+    active: true,
+  };
+}
+
+const CATALOG_OFFERS = new Map<string, OfferRecord>();
+
+function resolveOffer(offerId: string, merchantId: string): OfferRecord | undefined {
+  const seeded = findOffer(offerId);
+  if (seeded) return seeded;
+  if (!isLocalCatalogMerchantId(merchantId)) return undefined;
+  const cacheKey = `${merchantId}|${offerId}`;
+  const cached = CATALOG_OFFERS.get(cacheKey);
+  if (cached) return cached;
+  const o = listDemoOffers(merchantId).find((x) => x.offer_id === offerId);
+  if (!o) return undefined;
+  const rec: OfferRecord = {
+    offer_id: o.offer_id,
+    merchant_id: merchantId,
+    version: 1,
+    kind: o.kind,
+    percent_bps: o.percent_bps,
+    title: o.title,
+    title_bn: o.title_bn,
+    windows: o.windows,
+    valid_from: CATALOG_VALID_FROM,
+    valid_until: o.valid_until,
+    min_spend_minor: o.min_spend_minor,
+    max_discount_minor: o.max_discount_minor,
+    cap_per_day: 50,
+    cap_total: 5000,
+    cap_per_customer: 5,
+    allowed_methods: o.allowed_methods,
+    state: "ACTIVE",
+    cap_recredit_on_refund: true,
+  };
+  CATALOG_OFFERS.set(cacheKey, rec);
+  return rec;
+}
+
+function wallNowIso(): string {
+  return new Date().toISOString().replace(/\.\d{3}Z$/, "Z");
+}
+
+/** Evaluation instant: wall clock for catalog rows, SNAPSHOT_AT for fixtures. */
+function evalInstant(merchantId: string): string {
+  return isLocalCatalogMerchantId(merchantId) ? wallNowIso() : SNAPSHOT_AT;
+}
+
+// ---------------------------------------------------------------------------
 // Counters (fail-closed; one row per offer/scope/scope_key — spec/18 octr)
 // ---------------------------------------------------------------------------
 
@@ -552,7 +627,7 @@ seedCounter(["star-kabab", "lunch"], "total", "ALL", 240);
 function advisoryCounters(offerRec: OfferRecord, customerId: string | null) {
   const out: { dayUsed?: number; totalUsed?: number; customerUsed?: number } = {};
   if (offerRec.cap_per_day !== null) {
-    out.dayUsed = getCounter(offerRec.offer_id, "day", SNAPSHOT_DHAKA_DATE, offerRec.cap_per_day).used;
+    out.dayUsed = getCounter(offerRec.offer_id, "day", dhakaParts(evalInstant(offerRec.merchant_id)).dateStr, offerRec.cap_per_day).used;
   }
   if (offerRec.cap_total !== null) {
     out.totalUsed = getCounter(offerRec.offer_id, "total", "ALL", offerRec.cap_total).used;
@@ -727,16 +802,21 @@ export function eligibleOffersMock(params: {
   example_amount_minor: number | null;
   at: string;
 }): MockResult<{ data: EligibleOffer[] }> {
-  const merchant = findMerchant(params.merchant_id);
+  const merchant = resolveMerchant(params.merchant_id);
   if (!merchant) {
     return mockError("not_found", "merchant_not_found", "No such merchant.");
   }
-  const when = params.at || SNAPSHOT_AT;
+  const when = params.at || evalInstant(merchant.merchant_id);
   if (!Number.isFinite(Date.parse(when))) {
     return mockError("invalid_request", "validation_failed", "at must be an RFC3339 timestamp.");
   }
   const out: EligibleOffer[] = [];
-  for (const o of OFFERS) {
+  const pool: OfferRecord[] = isLocalCatalogMerchantId(merchant.merchant_id)
+    ? listDemoOffers(merchant.merchant_id)
+        .map((x) => resolveOffer(x.offer_id, merchant.merchant_id))
+        .filter((x): x is OfferRecord => x !== undefined)
+    : OFFERS;
+  for (const o of pool) {
     if (o.merchant_id !== merchant.merchant_id || o.state !== "ACTIVE") continue;
     let res;
     try {
@@ -817,7 +897,7 @@ export function createOfferIntentMock(params: {
   const stored = REPLAYS.get(replayKey);
   if (stored) return stored;
 
-  const merchant = findMerchant(params.merchant_id);
+  const merchant = resolveMerchant(params.merchant_id);
   if (!merchant) {
     return mockError("not_found", "merchant_not_found", "No such merchant.");
   }
@@ -845,7 +925,7 @@ export function createOfferIntentMock(params: {
     );
   }
 
-  const offerRec = findOffer(params.offer_id);
+  const offerRec = resolveOffer(params.offer_id, merchant.merchant_id);
   if (!offerRec || offerRec.merchant_id !== merchant.merchant_id) {
     return mockError("not_found", "offer_not_found", "No such offer at this merchant.");
   }
@@ -867,7 +947,7 @@ export function createOfferIntentMock(params: {
   try {
     evaluation = evaluateEligibility(offerRec, {
       merchantActive: merchant.active,
-      nowUtc: SNAPSHOT_AT,
+      nowUtc: evalInstant(merchant.merchant_id),
       grossAmountMinor: gross,
       method,
       counters: advisoryCounters(offerRec, customerId),
@@ -919,7 +999,12 @@ export function createOfferIntentMock(params: {
   if (offerRec.cap_per_day !== null) {
     scopes.push({
       scope: "day",
-      counter: getCounter(offerRec.offer_id, "day", SNAPSHOT_DHAKA_DATE, offerRec.cap_per_day),
+      counter: getCounter(
+        offerRec.offer_id,
+        "day",
+        dhakaParts(evalInstant(merchant.merchant_id)).dateStr,
+        offerRec.cap_per_day,
+      ),
     });
   }
   if (offerRec.cap_total !== null) {
@@ -1014,6 +1099,77 @@ export function confirmIntentMock(paymentIntentId: string): MockResult<PaymentIn
     rec.redemption_state = "APPLIED";
   }
   return { status: 200, body: intentView(rec) };
+}
+
+// ---------------------------------------------------------------------------
+// Sandbox one-tap demo pay — POST /v1/sandbox/demo/diner-pay (spec/16 LR-4 §F
+// demo family). The live BFF forwards this to the gateway simulator; the
+// in-app mock previously had no handler, so the merchant-page "Pay now
+// (simulated)" button and the wallet tap-to-pay both 404'd. Plain payment
+// (no offer block): create -> confirm -> SUCCEEDED in one step, recorded in
+// the diner's history like the gateway simulator does.
+// ---------------------------------------------------------------------------
+
+export interface DemoDinerPayMockResult {
+  payment_intent_id: string;
+  status: PaymentIntentView["status"];
+  amount_minor: number;
+  customer_id: string;
+  merchant_id: string;
+}
+
+const DEMO_PAY_REPLAYS = new Map<string, MockResult<DemoDinerPayMockResult>>();
+
+export function demoDinerPayMock(params: {
+  idempotencyKey: string;
+  merchant_id: string;
+  amount_minor: unknown;
+  payment_method: string;
+}): MockResult<DemoDinerPayMockResult> {
+  const replayKey = `${params.merchant_id}|${params.idempotencyKey}`;
+  const stored = DEMO_PAY_REPLAYS.get(replayKey);
+  if (stored) return stored;
+  const merchant = resolveMerchant(params.merchant_id);
+  if (!merchant) {
+    return mockError("not_found", "merchant_not_found", "No such merchant.");
+  }
+  const amount = params.amount_minor;
+  if (typeof amount !== "number" || !Number.isSafeInteger(amount) || amount <= 0) {
+    return mockError("invalid_request", "amount_not_positive", "amount_minor must be a positive integer (paisa).");
+  }
+  const method: CheckoutMethod = ["BANGLA_QR", "BKASH", "NAGAD"].includes(params.payment_method)
+    ? (params.payment_method as CheckoutMethod)
+    : "BANGLA_QR";
+  const at = wallNowIso();
+  const pi = id("pi", `demo-pay|${merchant.merchant_id}|${params.idempotencyKey}`);
+  INTENTS.set(pi, {
+    payment_intent_id: pi,
+    merchant_id: merchant.merchant_id,
+    merchant_display_name: merchant.display_name,
+    merchant_display_name_bn: merchant.display_name_bn,
+    customer_id: DEMO_CUSTOMER_ID,
+    amount_minor: amount,
+    currency: "BDT",
+    method,
+    status: "SUCCEEDED",
+    offer: null,
+    redemption_state: null,
+    created_at: at,
+    expires_at: at,
+    offer_version: null,
+  });
+  const result: MockResult<DemoDinerPayMockResult> = {
+    status: 201,
+    body: {
+      payment_intent_id: pi,
+      status: "SUCCEEDED",
+      amount_minor: amount,
+      customer_id: DEMO_CUSTOMER_ID,
+      merchant_id: merchant.merchant_id,
+    },
+  };
+  DEMO_PAY_REPLAYS.set(replayKey, result);
+  return result;
 }
 
 // ---------------------------------------------------------------------------

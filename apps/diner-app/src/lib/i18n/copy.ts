@@ -106,6 +106,10 @@ export const REFUSAL_COPY = {
     en: "Enter the bill amount before reserving the offer.",
     bn: "অফার সংরক্ষণের আগে বিলের পরিমাণ লিখুন।",
   },
+  session_required: {
+    en: "Sign in to pay. Browsing deals stays open without an account.",
+    bn: "পেমেন্ট করতে সাইন ইন করুন। অ্যাকাউন্ট ছাড়াই অফার দেখা যায়।",
+  },
   discount_equals_gross: {
     en: "The discount cannot cover the whole bill — at least 1 paisa must be paid.",
     bn: "ছাড় পুরো বিলের সমান হতে পারে না — অন্তত ১ পয়সা পরিশোধ করতে হবে।",

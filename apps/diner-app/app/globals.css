@@ -900,3 +900,34 @@ h2 {
   text-decoration: underline;
   text-underline-offset: 2px;
 }
+
+/* --- phone layout: keep the first venue cards near the fold ------------- */
+/* On narrow screens the wrapped filter chips (≈25 areas + cuisines) pushed
+   every merchant card below the first screen. Each chip row becomes a single
+   horizontally scrollable line; the hero tightens slightly. */
+@media (max-width: 640px) {
+  .chip-row {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    margin: 8px 0;
+    padding-bottom: 2px;
+  }
+  .chip-row::-webkit-scrollbar {
+    display: none;
+  }
+  .chip-row .chip {
+    flex: 0 0 auto;
+    white-space: nowrap;
+  }
+  .hero {
+    padding: 16px 16px 14px;
+  }
+  .hero-title {
+    font-size: 20px;
+  }
+  .hero-cta-row {
+    margin-top: 10px;
+  }
+}

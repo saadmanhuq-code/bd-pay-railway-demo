@@ -234,6 +234,38 @@ export const COPY = {
     en: "Scan this dynamic QR with your banking or MFS app. The code is bound to this payment only.",
     bn: "আপনার ব্যাংকিং বা এমএফএস অ্যাপ দিয়ে এই ডায়নামিক কিউআর স্ক্যান করুন। কোডটি কেবল এই পেমেন্টের জন্য নির্ধারিত।",
   },
+  webhook_url_https_required: {
+    en: "Endpoint URL must start with https:// (plain http is refused).",
+    bn: "এন্ডপয়েন্ট ইউআরএল https:// দিয়ে শুরু হতে হবে (সাধারণ http গ্রহণযোগ্য নয়)।",
+  },
+  webhook_events_required: {
+    en: "Select at least one event type.",
+    bn: "অন্তত একটি ইভেন্ট টাইপ বেছে নিন।",
+  },
+  checkout_brand: { en: "BD-PAY Checkout", bn: "বিডি-পে চেকআউট" },
+  checkout_sandbox_banner: {
+    en: "Sandbox checkout — simulator only, no real money moves.",
+    bn: "স্যান্ডবক্স চেকআউট — শুধু সিমুলেটর, কোনো আসল টাকা লেনদেন হয় না।",
+  },
+  sim_auth_title: { en: "Sandbox payment authorisation", bn: "স্যান্ডবক্স পেমেন্ট অনুমোদন" },
+  sim_auth_note: {
+    en: "This page stands in for the card / mobile-wallet authorisation step. Choose an outcome to simulate.",
+    bn: "এই পৃষ্ঠাটি কার্ড / মোবাইল ওয়ালেট অনুমোদন ধাপের সিমুলেশন। সিমুলেট করতে একটি ফলাফল বেছে নিন।",
+  },
+  sim_auth_approve: { en: "Approve payment (simulated)", bn: "পেমেন্ট অনুমোদন করুন (সিমুলেটেড)" },
+  sim_auth_decline: { en: "Decline (simulated)", bn: "প্রত্যাখ্যান করুন (সিমুলেটেড)" },
+  sim_result_success_title: { en: "Payment successful", bn: "পেমেন্ট সফল হয়েছে" },
+  sim_result_success_body: {
+    en: "The merchant has been notified. You can close this page.",
+    bn: "বিক্রেতাকে জানানো হয়েছে। আপনি এই পৃষ্ঠাটি বন্ধ করতে পারেন।",
+  },
+  sim_result_failed_title: { en: "Payment declined", bn: "পেমেন্ট প্রত্যাখ্যাত হয়েছে" },
+  sim_result_failed_body: {
+    en: "No money was taken. You can go back and try again.",
+    bn: "কোনো টাকা কাটা হয়নি। ফিরে গিয়ে আবার চেষ্টা করতে পারেন।",
+  },
+  sim_back_to_link: { en: "Back to payment link", bn: "পেমেন্ট লিংকে ফিরে যান" },
+  sim_completed_at: { en: "Completed", bn: "সম্পন্ন" },
   checkout_redirect_note: {
     en: "You will be redirected to complete this payment.",
     bn: "পেমেন্ট সম্পন্ন করতে আপনাকে অন্য পৃষ্ঠায় নেওয়া হবে।",

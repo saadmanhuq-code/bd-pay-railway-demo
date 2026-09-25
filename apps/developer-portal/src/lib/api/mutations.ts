@@ -39,6 +39,11 @@ export const MUTATION_MANIFEST: MutationRoute[] = [
   { name: "archiveOffer", method: "POST", path: "/v1/offers/:id/archive" },
   { name: "editOffer", method: "POST", path: "/v1/offers/:id/edit" },
   { name: "createPublicLinkIntent", method: "POST", path: "/v1/public/payment-links/:id/intents" },
+  {
+    name: "simulatePublicLinkIntent",
+    method: "POST",
+    path: "/v1/public/payment-links/:id/intents/:id/simulate",
+  },
   { name: "createSandboxSignup", method: "POST", path: "/v1/sandbox/signups" },
   { name: "verifySandboxSignup", method: "POST", path: "/v1/sandbox/signups/:id/verify" },
 ];

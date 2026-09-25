@@ -6,6 +6,7 @@
 import { createHmac } from "node:crypto";
 import type { Env } from "@/lib/api/types";
 import type {
+  PublicIntentSimView,
   CertificationEntry,
   CertificationMatrix,
   CheckoutMethod,
@@ -33,9 +34,17 @@ function tsAt(offsetMinutes: number): string {
 }
 
 let launchSeq = 0;
+// Mutation clock = WALL clock (second resolution, strictly monotonic so two
+// mutations in the same second still order). The seed epoch is anchored at
+// process boot, so a long-lived Railway replica previously stamped "just now"
+// actions (approve, create key, add webhook, link expiry…) with the boot hour
+// — e.g. an approval decided today showed yesterday 12:30.
+let lastMutationMs = 0;
 function mutationTs(): string {
   launchSeq += 1;
-  return new Date(EPOCH_MS + 45 * 60_000 + launchSeq * 1000).toISOString().replace(".000Z", "Z");
+  const nowSec = Math.floor(Date.now() / 1000) * 1000;
+  lastMutationMs = Math.max(nowSec, lastMutationMs + 1000);
+  return new Date(lastMutationMs).toISOString().replace(".000Z", "Z");
 }
 
 function id(prefix: string, key: string): string {
@@ -462,12 +471,90 @@ export function createPublicIntentMock(
     qr_expires_at: new Date(Date.parse(at) + 300_000).toISOString().replace(".000Z", "Z"),
   };
   if (method !== "BANGLA_QR") {
+    // Same-origin sandbox authorisation page (the old
+    // checkout.simulator.bdpay.example host never resolved, so the payer hit a
+    // browser DNS error). The live engine supplies the real acquirer/MFS URL.
     result.next_action = {
       type: "redirect_to_url",
-      redirect_to_url: `https://checkout.simulator.bdpay.example/redirect/${intentId}`,
+      redirect_to_url: `/pay/l/${encodeURIComponent(code)}/simulate?pi=${encodeURIComponent(intentId)}&method=${method}`,
     };
   }
+  publicIntents.set(intentId, {
+    payment_intent_id: intentId,
+    public_code: rec.public_code,
+    payment_link_id: rec.payment_link_id,
+    amount_minor: Number(amount),
+    method,
+    status: "REQUIRES_ACTION",
+    updated_at: at,
+  });
   return ok(result, 201);
+}
+
+// ---------------------------------------------------------------------------
+// Sandbox payer authorisation (mock only) — the hosted checkout's simulated
+// acquirer / MFS step. Succeed ⇒ intent SUCCEEDED and a single-use link PAID;
+// fail ⇒ intent FAILED and the link stays payable (the payer may retry).
+// ---------------------------------------------------------------------------
+
+interface PublicIntentRec {
+  payment_intent_id: string;
+  public_code: string;
+  payment_link_id: string;
+  amount_minor: number;
+  method: CheckoutMethod;
+  status: "REQUIRES_ACTION" | "SUCCEEDED" | "FAILED";
+  updated_at: string;
+}
+
+const publicIntents = new Map<string, PublicIntentRec>();
+
+export function getPublicIntentMock(code: string, intentId: string): MockResult<PublicIntentSimView> {
+  const pi = publicIntents.get(intentId);
+  if (!pi || pi.public_code !== code) {
+    return mockError("not_found", "payment_intent_not_found", "No such payment for this link.");
+  }
+  return ok(publicIntentView(pi));
+}
+
+export function simulatePublicIntentMock(
+  code: string,
+  intentId: string,
+  outcome: "succeed" | "fail",
+): MockResult<PublicIntentSimView> {
+  const pi = publicIntents.get(intentId);
+  if (!pi || pi.public_code !== code) {
+    return mockError("not_found", "payment_intent_not_found", "No such payment for this link.");
+  }
+  if (pi.status !== "REQUIRES_ACTION") {
+    return mockError("conflict", "invalid_state_transition", `This payment is already ${pi.status}.`);
+  }
+  const at = mutationTs();
+  pi.status = outcome === "succeed" ? "SUCCEEDED" : "FAILED";
+  pi.updated_at = at;
+  const rec = paymentLinks.find((l) => l.payment_link_id === pi.payment_link_id);
+  if (rec) {
+    if (outcome === "succeed" && rec.single_use && rec.state === "ACTIVE") {
+      rec.state = "PAID";
+    }
+    if (outcome === "fail" && openIntentByLink.get(rec.payment_link_id) === pi.payment_intent_id) {
+      openIntentByLink.delete(rec.payment_link_id);
+    }
+  }
+  return ok(publicIntentView(pi));
+}
+
+function publicIntentView(pi: PublicIntentRec): PublicIntentSimView {
+  return {
+    payment_intent_id: pi.payment_intent_id,
+    status: pi.status,
+    amount_minor: pi.amount_minor,
+    currency: "BDT",
+    method: pi.method,
+    merchant_display_name: DEMO_MERCHANT.trade_name,
+    merchant_display_name_bn: DEMO_MERCHANT.trade_name_bn,
+    updated_at: pi.updated_at,
+  };
 }
 
 // ---------------------------------------------------------------------------
