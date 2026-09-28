@@ -76,6 +76,9 @@ export default function ConnectorDetailPage() {
 
   return (
     <Shell>
+      <p className="back-link-row">
+        <Link href="/connectors">← {t("nav_connectors")}</Link>
+      </p>
       <h1>{t("nav_connectors")}</h1>
       {item ? (
         <>

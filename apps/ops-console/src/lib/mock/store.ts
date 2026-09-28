@@ -75,8 +75,9 @@ function isoWeekLabelAt(offsetMinutes: number): string {
   const dow = (d.getUTCDay() + 6) % 7; // Mon=0
   d.setUTCDate(d.getUTCDate() - dow + 3); // Thursday of this ISO week
   const year = d.getUTCFullYear();
-  const jan4 = new Date(Date.UTC(year, 0, 4));
-  const week = 1 + Math.round((d.getTime() - jan4.getTime()) / 86_400_000 / 7 - ((jan4.getUTCDay() + 6) % 7 - 3) / 7);
+  const week1Thu = new Date(Date.UTC(year, 0, 4)); // Jan 4 is always in ISO week 1
+  week1Thu.setUTCDate(week1Thu.getUTCDate() - ((week1Thu.getUTCDay() + 6) % 7) + 3);
+  const week = 1 + Math.round((d.getTime() - week1Thu.getTime()) / (7 * 86_400_000));
   return `${year}-W${String(week).padStart(2, "0")}`;
 }
 

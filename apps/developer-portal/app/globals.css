@@ -741,6 +741,7 @@ h3 {
   .grid-2,
   .grid-3 {
     grid-template-columns: 1fr;
+    row-gap: 0; /* stacked panels already carry their own bottom margin */
   }
   .kv {
     grid-template-columns: 1fr;

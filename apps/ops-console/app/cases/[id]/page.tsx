@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import React, { useCallback, useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { Shell } from "@/components/Shell";
@@ -82,6 +83,9 @@ export default function CaseDetailPage() {
 
   return (
     <Shell>
+      <p className="back-link-row">
+        <Link href="/cases">← {t("nav_cases")}</Link>
+      </p>
       <h1>{t("nav_cases")}</h1>
       {item ? (
         <>

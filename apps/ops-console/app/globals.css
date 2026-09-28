@@ -529,6 +529,11 @@ h3 {
   font-size: 12px;
 }
 
+.back-link-row {
+  margin: 0 0 6px;
+  font-size: 13px;
+}
+
 /* ---------------------------------------------------------------------------
  * Phone layout (<= 760px): the 230px sidebar becomes a sticky top bar with a
  * horizontally scrollable nav so the page never overflows sideways and the
@@ -593,6 +598,7 @@ h3 {
   .grid-2,
   .grid-3 {
     grid-template-columns: 1fr;
+    row-gap: 0; /* stacked panels already carry their own bottom margin */
   }
   .kv {
     grid-template-columns: 1fr;

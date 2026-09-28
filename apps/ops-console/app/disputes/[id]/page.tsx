@@ -5,6 +5,7 @@
 // UNDER_REVIEW → resolve merchant/customer (two-eyes notice) or file
 // chargeback (method=CARD only).
 
+import Link from "next/link";
 import React, { useCallback, useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { Shell } from "@/components/Shell";
@@ -80,6 +81,9 @@ export default function DisputeDetailPage() {
 
   return (
     <Shell>
+      <p className="back-link-row">
+        <Link href="/disputes">← {t("nav_disputes")}</Link>
+      </p>
       <h1>{t("nav_disputes")}</h1>
       {item ? (
         <>

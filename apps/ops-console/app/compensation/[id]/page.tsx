@@ -102,6 +102,9 @@ export default function CompensationDetailPage() {
 
   return (
     <Shell>
+      <p className="back-link-row">
+        <Link href="/compensation">← {t("nav_compensation")}</Link>
+      </p>
       <h1>{t("nav_compensation")}</h1>
       {item ? (
         <>

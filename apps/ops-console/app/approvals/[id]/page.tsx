@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import React, { useCallback, useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { Shell } from "@/components/Shell";
@@ -79,6 +80,9 @@ export default function ApprovalDetailPage() {
 
   return (
     <Shell>
+      <p className="back-link-row">
+        <Link href="/approvals">← {t("nav_approvals")}</Link>
+      </p>
       <h1>{t("nav_approvals")}</h1>
       {appr ? (
         <>
