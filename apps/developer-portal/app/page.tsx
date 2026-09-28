@@ -6,7 +6,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { ApiError, getMerchantDashboard } from "@/lib/api/client";
 import type { MerchantDashboard, PaymentIntentSummary } from "@/lib/api/types";
-import { AgeBadge, EnvBadge, StateBadge } from "@/components/Badges";
+import { AgeBadge, EnvBadge, MethodLabel, StateBadge } from "@/components/Badges";
 import { DataTable, type Column } from "@bdpay/edge/ui/DataTable";
 import { Shell } from "@/components/Shell";
 import { formatBdt, formatTs, shortId } from "@/lib/format";
@@ -21,7 +21,7 @@ const INTENT_COLUMNS: Column<PaymentIntentSummary>[] = [
     sortValue: (r) => Number(BigInt(r.amount_minor)),
     render: (r) => formatBdt(r.amount_minor),
   },
-  { key: "method", label: "Method", sortValue: (r) => r.method, render: (r) => r.method },
+  { key: "method", label: "Method", sortValue: (r) => r.method, render: (r) => <MethodLabel value={r.method} /> },
   { key: "status", label: "State", sortValue: (r) => r.status, render: (r) => <StateBadge value={r.status} /> },
   { key: "created", label: "Created", sortValue: (r) => r.created_at, render: (r) => formatTs(r.created_at) },
 ];

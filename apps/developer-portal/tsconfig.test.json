@@ -14,6 +14,7 @@
   },
   "files": [
     "src/lib/api/live-key-management-guard.ts",
-    "src/lib/api/live-merchant-login.ts"
+    "src/lib/api/live-merchant-login.ts",
+    "src/lib/i18n/enums.ts"
   ]
 }

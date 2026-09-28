@@ -6,7 +6,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ApiError, listDisputes } from "@/lib/api/client";
 import type { Dispute, DisputeState } from "@/lib/api/types";
-import { StateBadge } from "@/components/Badges";
+import { MethodLabel, StateBadge } from "@/components/Badges";
 import { DataTable, type Column } from "@bdpay/edge/ui/DataTable";
 import { Shell } from "@/components/Shell";
 import { deadlineCountdown, formatBdt, formatTs, shortId } from "@/lib/format";
@@ -54,7 +54,7 @@ export default function DisputesPage() {
       sortValue: (r) => Number(BigInt(r.amount_minor)),
       render: (r) => formatBdt(r.amount_minor),
     },
-    { key: "method", label: "Method", sortValue: (r) => r.method, render: (r) => r.method },
+    { key: "method", label: "Method", sortValue: (r) => r.method, render: (r) => <MethodLabel value={r.method} /> },
     { key: "reason", label: "Reason", render: (r) => r.reason_code },
     { key: "state", label: "State", sortValue: (r) => r.state, render: (r) => <StateBadge value={r.state} /> },
     {

@@ -8,7 +8,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { ApiError, getDispute, submitDisputeEvidence } from "@/lib/api/client";
 import type { Dispute } from "@/lib/api/types";
-import { StateBadge } from "@/components/Badges";
+import { MethodLabel, StateBadge } from "@/components/Badges";
 import { Shell } from "@/components/Shell";
 import { TotpModal } from "@/components/TotpModal";
 import { deadlineCountdown, formatBdt, formatTs, shortId } from "@/lib/format";
@@ -97,7 +97,7 @@ export default function DisputeDetailPage() {
               <dd className="mono">{dispute.payment_intent_id}</dd>
               <dt>Amount</dt>
               <dd>
-                {formatBdt(dispute.amount_minor)} · {dispute.method}
+                {formatBdt(dispute.amount_minor)} · <MethodLabel value={dispute.method} />
               </dd>
               <dt>Reason</dt>
               <dd>{dispute.reason_code}</dd>

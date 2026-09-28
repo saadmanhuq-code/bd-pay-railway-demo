@@ -3,6 +3,7 @@
 import React from "react";
 import { ageLabel } from "@/lib/format";
 import { useLang } from "@/lib/i18n/LangContext";
+import { enumLabel } from "@/lib/i18n/enums";
 
 const GOOD = new Set(["ACTIVE", "SUCCEEDED", "DELIVERED", "RELEASED", "RESOLVED_MERCHANT", "ACCEPTED", "RELEASE_SCHEDULED", "CHARGEBACK_CLOSED"]);
 const BAD = new Set(["FAILED", "REVOKED", "EXPIRED", "REJECTED", "DELETED", "EXHAUSTED", "RESOLVED_CUSTOMER", "SUSPENDED", "TERMINATED", "CANCELLED"]);
@@ -32,8 +33,19 @@ const WARN = new Set([
 ]);
 
 export function StateBadge({ value }: { value: string }) {
+  const { lang } = useLang();
   const cls = GOOD.has(value) ? "badge badge-good" : BAD.has(value) ? "badge badge-bad" : WARN.has(value) ? "badge badge-warn" : "badge";
-  return <span className={cls}>{value}</span>;
+  return (
+    <span className={cls} title={value}>
+      {enumLabel(value, lang)}
+    </span>
+  );
+}
+
+/** Payment-method cell: brand label, raw code on hover. */
+export function MethodLabel({ value }: { value: string }) {
+  const { lang } = useLang();
+  return <span title={value}>{enumLabel(value, lang)}</span>;
 }
 
 // Data-age badge — every dashboard panel shows one (spec/15 §Failure modes:
