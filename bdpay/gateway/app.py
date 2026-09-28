@@ -28,7 +28,7 @@ from datetime import UTC, datetime
 
 from fastapi import FastAPI, Request, Response
 from fastapi.exceptions import RequestValidationError
-from fastapi.responses import JSONResponse, PlainTextResponse
+from fastapi.responses import HTMLResponse, JSONResponse, PlainTextResponse
 from pydantic import BaseModel, ValidationError
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from starlette.middleware.base import BaseHTTPMiddleware
@@ -117,6 +117,61 @@ SECURITY_HEADERS = {
 }
 
 _AUTHED_IP_LIMIT_PER_MINUTE = 1200
+
+# -- API reference page (GET /docs) --------------------------------------------
+# A static HTML shell that renders /v1/openapi.json with Redoc from jsDelivr,
+# pinned by version and Subresource Integrity. No inline script: the <redoc>
+# custom element reads spec-url itself. The page carries its own CSP (the
+# middleware only ``setdefault``s the strict API default), scoped to exactly
+# what Redoc needs: the pinned CDN script, same-origin spec fetch, inline
+# styles (styled-components), blob: workers (search index) and data: images.
+REDOC_VERSION = "2.5.4"
+REDOC_SRC = f"https://cdn.jsdelivr.net/npm/redoc@{REDOC_VERSION}/bundles/redoc.standalone.js"
+REDOC_SRI = "sha384-w447zOpYfw/1Tv/5AK9NfHTlQIqE3RVR6KY62jCyy9zNDgO64cMwGGP1Fj0zJVf5"
+DOCS_CSP = (
+    "default-src 'none'; "
+    "script-src https://cdn.jsdelivr.net; "
+    "style-src 'self' 'unsafe-inline'; "
+    "img-src 'self' data: https:; "
+    "font-src 'self' data:; "
+    "connect-src 'self'; "
+    "worker-src blob:; "
+    "frame-ancestors 'none'; base-uri 'none'; form-action 'none'"
+)
+DOCS_HTML = f"""<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BD Pay API reference</title>
+<meta name="description" content="BD Pay gateway API v1 reference (OpenAPI).">
+<style>
+body{{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}}
+.bdpay-bar{{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;padding:10px 16px;
+background:#0b3d2e;color:#fff;font-size:14px}}
+.bdpay-bar strong{{font-size:15px}}
+.bdpay-bar a{{color:#bff0d8}}
+.bdpay-bar .tag{{background:#f5c542;color:#1a1a1a;border-radius:10px;
+padding:1px 8px;font-size:12px}}
+noscript p{{padding:16px}}
+</style>
+</head>
+<body>
+<div class="bdpay-bar">
+<strong>BD Pay API reference</strong>
+<span class="tag">Sandbox &middot; simulated money</span>
+<a href="/v1/openapi.json">openapi.json</a>
+<a href="/">Service status</a>
+</div>
+<noscript><p>This page needs JavaScript. The raw schema is at
+<a href="/v1/openapi.json">/v1/openapi.json</a>.</p></noscript>
+<redoc spec-url="/v1/openapi.json" hide-download-button="false"
+ path-in-middle-panel="true" native-scrollbars="true"></redoc>
+<script src="{REDOC_SRC}" integrity="{REDOC_SRI}" crossorigin="anonymous"></script>
+</body>
+</html>
+"""
+
 _MUTATING_METHODS = ("POST", "PUT", "PATCH")
 
 
@@ -671,6 +726,14 @@ def create_app(deps: GatewayDependencies) -> FastAPI:
     app = FastAPI(
         title="BD-PAY Gateway",
         version="1",
+        description=(
+            "BD Pay payment gateway, API v1. **Sandbox: simulated money only.**\n\n"
+            "Merchant calls authenticate with `Authorization: Bearer <api key>` "
+            "(create keys in the developer portal). Mutating calls (POST/PUT/PATCH) "
+            "require an `Idempotency-Key` header. Every response carries "
+            "`X-BDPay-Request-Id`; errors use one envelope: "
+            "`{\"error\": {\"type\", \"code\", \"message\", \"request_id\", \"doc_url\"}}`."
+        ),
         openapi_url="/v1/openapi.json",
         docs_url=None,
         redoc_url=None,
@@ -2672,12 +2735,19 @@ def create_app(deps: GatewayDependencies) -> FastAPI:
             "links": {
                 "health": "/healthz",
                 "ready": "/v1/ready",
+                "docs": "/docs",
                 "openapi": "/v1/openapi.json",
                 "developer_portal": cfg.portal_url or None,
             },
             "timestamp": rfc3339(deps.clock.now()),
         }
         return JSONResponse(body)
+
+    async def docs(request: Request) -> Response:
+        return HTMLResponse(
+            DOCS_HTML,
+            headers={"Content-Security-Policy": DOCS_CSP, "Cache-Control": "public, max-age=300"},
+        )
 
     async def health(request: Request) -> Response:
         # runtime_sha/deploy_id: the health running-sha contract the portfolio
@@ -2892,6 +2962,7 @@ def create_app(deps: GatewayDependencies) -> FastAPI:
     app.add_api_route("/v1/webhooks/{connector_id}", inbound_webhook, methods=["POST"])
     app.add_api_route("/", root, methods=["GET"])
     app.add_api_route("/v1/health", health, methods=["GET"])
+    app.add_api_route("/docs", docs, methods=["GET"])
     app.add_api_route("/healthz", health, methods=["GET"])
     app.add_api_route("/v1/ready", ready, methods=["GET"])
     app.add_api_route("/readyz", ready, methods=["GET"])

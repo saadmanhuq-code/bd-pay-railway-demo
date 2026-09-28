@@ -156,15 +156,44 @@ export default function BrowsePage() {
         </p>
       ) : null}
 
-      <label className="field">
-        <span>{t("browse_search")}</span>
+      {/* Search + Near me share one row so the first venue card sits above the
+          fold on desktop (FE QA 2026-09-28 pm). */}
+      <label htmlFor="browse-q" className="filter-label">
+        {t("browse_search")}
+      </label>
+      <div className="search-row">
         <input
+          id="browse-q"
+          className="search-input"
           value={q}
           onChange={(e) => setQ(e.target.value)}
-          placeholder={t("browse_search")}
           inputMode="search"
+          type="search"
         />
-      </label>
+        <button
+          type="button"
+          className={`chip near-me-chip ${sortNear && geo.status === "granted" ? "active" : ""}`}
+          onClick={onNearMe}
+          disabled={geo.status === "prompting"}
+        >
+          {geo.status === "prompting" ? t("near_me_locating") : t("near_me")}
+        </button>
+      </div>
+      {(sortNear && geo.status === "granted") ||
+      geo.status === "denied" ||
+      geo.status === "unavailable" ? (
+        <div className="near-me-row">
+          {sortNear && geo.status === "granted" ? (
+            <span className="subtle">{t("sort_nearby")}</span>
+          ) : null}
+          {geo.status === "denied" ? (
+            <span className="subtle geo-hint">{t("near_me_denied")}</span>
+          ) : null}
+          {geo.status === "unavailable" ? (
+            <span className="subtle geo-hint">{t("near_me_unavailable")}</span>
+          ) : null}
+        </div>
+      ) : null}
 
       <div className="filter-block">
         <span className="filter-label">{t("city_label")}</span>
@@ -233,26 +262,6 @@ export default function BrowsePage() {
             {t(f.labelKey)}
           </button>
         ))}
-      </div>
-
-      <div className="near-me-row">
-        <button
-          type="button"
-          className={`chip near-me-chip ${sortNear && geo.status === "granted" ? "active" : ""}`}
-          onClick={onNearMe}
-          disabled={geo.status === "prompting"}
-        >
-          {geo.status === "prompting" ? t("near_me_locating") : t("near_me")}
-        </button>
-        {sortNear && geo.status === "granted" ? (
-          <span className="subtle">{t("sort_nearby")}</span>
-        ) : null}
-        {geo.status === "denied" ? (
-          <span className="subtle geo-hint">{t("near_me_denied")}</span>
-        ) : null}
-        {geo.status === "unavailable" ? (
-          <span className="subtle geo-hint">{t("near_me_unavailable")}</span>
-        ) : null}
       </div>
 
       {error ? <p className="error-text">{error}</p> : null}

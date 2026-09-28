@@ -684,6 +684,15 @@ def build_policies() -> tuple[RoutePolicy, ...]:
             skip_auth=True,
         ),
         RoutePolicy(
+            name="system.docs",
+            method="GET",
+            pattern=_p("/docs"),
+            route_group="system",
+            public=True,
+            ip_limit_per_minute=600,
+            skip_auth=True,
+        ),
+        RoutePolicy(
             name="system.openapi",
             method="GET",
             pattern=_p("/v1/openapi.json"),

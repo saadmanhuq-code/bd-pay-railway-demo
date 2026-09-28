@@ -901,26 +901,124 @@ h2 {
   text-underline-offset: 2px;
 }
 
-/* --- phone layout: keep the first venue cards near the fold ------------- */
-/* On narrow screens the wrapped filter chips (≈25 areas + cuisines) pushed
-   every merchant card below the first screen. Each chip row becomes a single
-   horizontally scrollable line; the hero tightens slightly. */
-@media (max-width: 640px) {
+/* --- browse filters: keep the first venue cards above the fold ----------- */
+/* The wrapped filter chips (~25 areas + cuisines + windows) pushed every
+   merchant card below the first screen — on phones (FE QA am) and at 1280px
+   desktop (first card at y≈710, FE QA pm). Each chip row is now a single
+   horizontally scrollable line at every width, search and "Near me" share a
+   row, and the hero is tighter. Fine pointers get a thin visible scrollbar and
+   an edge fade so the overflow is discoverable without touch. */
+.chip-row {
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x proximity;
+  margin: 8px 0;
+  padding-bottom: 2px;
+}
+.chip-row .chip {
+  flex: 0 0 auto;
+  white-space: nowrap;
+  scroll-snap-align: start;
+}
+.filter-block .chip-row {
+  margin-top: 2px;
+}
+
+.search-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 6px;
+}
+.search-input {
+  flex: 1;
+  min-width: 0;
+  padding: 10px 12px;
+  font-size: 16px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fffdf9;
+}
+label.filter-label {
+  margin-top: 10px;
+}
+.search-row .near-me-chip {
+  flex: 0 0 auto;
+  white-space: nowrap;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 14px;
+}
+.near-me-row:empty {
+  display: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
   .chip-row {
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: #cfc7b8 transparent;
+    -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 28px), transparent);
+    mask-image: linear-gradient(to right, #000 calc(100% - 28px), transparent);
+    padding-right: 24px;
+  }
+  .chip-row::-webkit-scrollbar {
+    height: 6px;
+  }
+  .chip-row::-webkit-scrollbar-thumb {
+    background: #cfc7b8;
+    border-radius: 3px;
+  }
+}
+
+@media (hover: none), (pointer: coarse) {
+  .chip-row {
     scrollbar-width: none;
-    margin: 8px 0;
-    padding-bottom: 2px;
   }
   .chip-row::-webkit-scrollbar {
     display: none;
   }
-  .chip-row .chip {
-    flex: 0 0 auto;
-    white-space: nowrap;
+}
+
+@media (min-width: 641px) {
+  .hero {
+    padding: 16px 20px 14px;
+    margin-bottom: 10px;
   }
+  .hero-eyebrow {
+    margin-bottom: 4px;
+  }
+  .hero-title {
+    font-size: 21px;
+    margin-bottom: 4px;
+  }
+  /* Desktop: sign-in CTA sits beside the headline instead of below it. */
+  .hero {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    column-gap: 20px;
+    align-items: center;
+  }
+  .hero > * {
+    grid-column: 1;
+  }
+  .hero > .hero-cta-row {
+    grid-column: 2;
+    grid-row: 1 / span 3;
+    flex-direction: column;
+    align-items: flex-end;
+    max-width: 210px;
+    margin: 0;
+    text-align: right;
+    gap: 6px;
+  }
+  .demo-banner {
+    margin: 0 0 6px;
+    padding: 7px 12px;
+  }
+}
+
+@media (max-width: 640px) {
   .hero {
     padding: 16px 16px 14px;
   }

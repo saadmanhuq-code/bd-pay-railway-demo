@@ -177,6 +177,11 @@ export const COPY = {
   browse_search: { en: "Search restaurants", bn: "রেস্তোরাঁ খুঁজুন" },
   browse_offers_live: { en: "offers live now", bn: "টি অফার এখন চালু" },
   browse_offers_later: { en: "offers at set hours — none live right now", bn: "নির্দিষ্ট সময়ে অফার — এখন চালু নেই" },
+  venue_not_found_title: { en: "Restaurant not found", bn: "রেস্তোরাঁটি পাওয়া যায়নি" },
+  venue_not_found_body: {
+    en: "This link doesn't match any restaurant on BD-PAY Diner. It may have been removed — browse the current offers instead.",
+    bn: "এই লিংকের সাথে বিডি-পে ডাইনারের কোনো রেস্তোরাঁ মেলেনি। এটি সরিয়ে ফেলা হয়ে থাকতে পারে — বর্তমান অফারগুলো দেখুন।",
+  },
   venue_back: { en: "All offers", bn: "সব অফার" },
   browse_no_offers_now: { en: "no offers right now", bn: "এখন কোনো অফার নেই" },
   browse_up_to: { en: "up to", bn: "সর্বোচ্চ" },

@@ -229,6 +229,27 @@ export default function MerchantOffersPage() {
     );
   }
 
+  // Unknown / stale venue link: say so instead of rendering a nameless venue
+  // with a live-looking payment form (FE QA 2026-09-28 pm).
+  if (offers !== null && merchant === null && !loadError) {
+    return (
+      <Shell session={session}>
+        <p className="back-link-row">
+          <Link href="/" className="back-link">
+            ← {t("venue_back")}
+          </Link>
+        </p>
+        <h1>{t("venue_not_found_title")}</h1>
+        <p className="notice">{t("venue_not_found_body")}</p>
+        <p>
+          <Link className="btn btn-primary" href="/">
+            {t("venue_back")}
+          </Link>
+        </p>
+      </Shell>
+    );
+  }
+
   return (
     <Shell session={session}>
       {source === "osm" ? (
