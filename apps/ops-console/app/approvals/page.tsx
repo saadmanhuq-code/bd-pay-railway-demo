@@ -9,9 +9,10 @@ import { listApprovals } from "@/lib/api/client";
 import { APPROVAL_ACTION_TYPES, APPROVAL_STATES, type ApprovalRequest } from "@/lib/api/types";
 import { formatTs, shortId } from "@/lib/format";
 import { useLang } from "@/lib/i18n/LangContext";
+import { enumLabel, humanizeEnum } from "@/lib/i18n/enums";
 
 export default function ApprovalsPage() {
-  const { t } = useLang();
+  const { t, lang } = useLang();
   const router = useRouter();
   const [rows, setRows] = useState<ApprovalRequest[]>([]);
   const [state, setState] = useState("PENDING_SECOND_APPROVER");
@@ -30,46 +31,46 @@ export default function ApprovalsPage() {
   const columns: Column<ApprovalRequest>[] = [
     {
       key: "id",
-      label: "ID",
+      label: t("col_id"),
       render: (r) => <span className="mono">{shortId(r.approval_request_id, 18)}</span>,
     },
     {
       key: "action",
-      label: "Action type",
+      label: t("col_action_type"),
       sortValue: (r) => r.action_type,
-      render: (r) => r.action_type,
+      render: (r) => <span title={r.action_type}>{enumLabel(r.action_type, lang)}</span>,
     },
     {
       key: "subject",
-      label: "Subject",
+      label: t("col_subject"),
       sortValue: (r) => r.subject_type,
       render: (r) => (
         <span>
-          {r.subject_type} <span className="mono subtle">{shortId(r.subject_id, 16)}</span>
+          {humanizeEnum(r.subject_type)} <span className="mono subtle">{shortId(r.subject_id, 16)}</span>
         </span>
       ),
     },
     {
       key: "state",
-      label: "State",
+      label: t("col_state"),
       sortValue: (r) => r.state,
       render: (r) => <StateBadge value={r.state} />,
     },
     {
       key: "initiator",
-      label: "Initiator",
+      label: t("col_initiator"),
       sortValue: (r) => r.initiator_name,
       render: (r) => r.initiator_name,
     },
     {
       key: "created",
-      label: "Created",
+      label: t("col_created"),
       sortValue: (r) => r.created_at,
       render: (r) => formatTs(r.created_at),
     },
     {
       key: "expires",
-      label: "Expires (24h TTL)",
+      label: t("col_expires"),
       sortValue: (r) => r.expires_at,
       render: (r) => formatTs(r.expires_at),
     },
@@ -80,29 +81,29 @@ export default function ApprovalsPage() {
       <h1>{t("nav_approvals")}</h1>
       <div className="toolbar">
         <label className="field">
-          <span>State</span>
+          <span>{t("col_state")}</span>
           <select value={state} onChange={(e) => setState(e.target.value)}>
             <option value="">{t("all")}</option>
             {APPROVAL_STATES.map((s) => (
               <option key={s} value={s}>
-                {s}
+                {enumLabel(s, lang)}
               </option>
             ))}
           </select>
         </label>
         <label className="field">
-          <span>Action type</span>
+          <span>{t("col_action_type")}</span>
           <select value={actionType} onChange={(e) => setActionType(e.target.value)}>
             <option value="">{t("all")}</option>
             {APPROVAL_ACTION_TYPES.map((a) => (
               <option key={a} value={a}>
-                {a}
+                {enumLabel(a, lang)}
               </option>
             ))}
           </select>
         </label>
         <label className="field">
-          <span>Mine</span>
+          <span>{t("col_mine")}</span>
           <select value={mine} onChange={(e) => setMine(e.target.value)}>
             <option value="">{t("all")}</option>
             <option value="initiated">{t("mine_initiated")}</option>
@@ -116,7 +117,7 @@ export default function ApprovalsPage() {
           rows={rows}
           rowKey={(r) => r.approval_request_id}
           onRowClick={(r) => router.push(`/approvals/${r.approval_request_id}`)}
-          empty={loading ? t("loading") : "No approval requests match the filter"}
+          empty={loading ? t("loading") : t("empty_approvals")}
         />
       </div>
     </Shell>

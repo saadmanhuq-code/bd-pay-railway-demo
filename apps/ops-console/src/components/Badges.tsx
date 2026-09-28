@@ -3,6 +3,7 @@
 import React from "react";
 import { ageLabel } from "@/lib/format";
 import { useLang } from "@/lib/i18n/LangContext";
+import { enumLabel } from "@/lib/i18n/enums";
 
 const GOOD = new Set(["APPROVED", "RESOLVED", "VERIFIED", "HEALTHY", "CLOSED", "ACTIVE", "PASSED", "CONFIRMED", "RESOLVED_MERCHANT", "RESOLVED_CUSTOMER", "PRODUCTION", "ACKNOWLEDGED"]);
 const BAD = new Set(["REJECTED", "FAILED", "UNHEALTHY", "OPEN_CIRCUIT", "DISABLED", "EXPIRED", "APPROVED_EXECUTION_FAILED", "LOCKED", "WRITTEN_OFF", "P0"]);
@@ -10,8 +11,13 @@ const WARN = new Set(["PENDING_SECOND_APPROVER", "PENDING_APPROVAL", "DEGRADED",
 
 export function StateBadge({ value, circuit }: { value: string; circuit?: boolean }) {
   const key = circuit && value === "OPEN" ? "OPEN_CIRCUIT" : value;
+  const { lang } = useLang();
   const cls = GOOD.has(key) ? "badge badge-good" : BAD.has(key) ? "badge badge-bad" : WARN.has(key) ? "badge badge-warn" : "badge";
-  return <span className={cls}>{value}</span>;
+  return (
+    <span className={cls} title={value}>
+      {enumLabel(value, lang)}
+    </span>
+  );
 }
 
 export function PriorityBadge({ value }: { value: string }) {
@@ -22,10 +28,10 @@ export function PriorityBadge({ value }: { value: string }) {
 // Data-age badge — every dashboard panel shows one (spec/15 §Failure modes:
 // "stale dashboard during incident" — explicit staleness, never silently old).
 export function AgeBadge({ asOf }: { asOf: string }) {
-  const { t } = useLang();
+  const { t, lang } = useLang();
   return (
     <span className="badge badge-age" title={asOf}>
-      {t("data_age")}: {ageLabel(asOf)}
+      {t("data_age")}: {ageLabel(asOf, lang)}
     </span>
   );
 }

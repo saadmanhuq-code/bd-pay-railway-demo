@@ -9,9 +9,10 @@ import { listCompensation } from "@/lib/api/client";
 import { COMPENSATION_STATES, type CompensationQueueItem } from "@/lib/api/types";
 import { formatBdt, formatTs, shortId } from "@/lib/format";
 import { useLang } from "@/lib/i18n/LangContext";
+import { enumLabel } from "@/lib/i18n/enums";
 
 export default function CompensationPage() {
-  const { t } = useLang();
+  const { t, lang } = useLang();
   const router = useRouter();
   const [rows, setRows] = useState<CompensationQueueItem[]>([]);
   const [state, setState] = useState("");
@@ -26,35 +27,32 @@ export default function CompensationPage() {
   }, [state]);
 
   const columns: Column<CompensationQueueItem>[] = [
-    { key: "id", label: "ID", render: (r) => <span className="mono">{shortId(r.compensation_id, 18)}</span> },
-    { key: "connector", label: "Connector", sortValue: (r) => r.connector_id, render: (r) => r.connector_id },
-    { key: "ref", label: "Connector ref", render: (r) => <span className="mono">{r.connector_ref}</span> },
+    { key: "id", label: t("col_id"), render: (r) => <span className="mono">{shortId(r.compensation_id, 18)}</span> },
+    { key: "connector", label: t("col_connector"), sortValue: (r) => r.connector_id, render: (r) => r.connector_id },
+    { key: "ref", label: t("col_connector_ref"), render: (r) => <span className="mono">{r.connector_ref}</span> },
     {
       key: "amount",
-      label: "Amount",
+      label: t("col_amount"),
       sortValue: (r) => BigInt(r.amount_minor).toString().padStart(20, "0"),
       render: (r) => formatBdt(r.amount_minor),
     },
-    { key: "state", label: "State", sortValue: (r) => r.state, render: (r) => <StateBadge value={r.state} /> },
-    { key: "kind", label: "Resolution kind", render: (r) => r.resolution_kind ?? "—" },
-    { key: "queued", label: "Queued (SLA 4h first touch)", sortValue: (r) => r.queued_at, render: (r) => formatTs(r.queued_at) },
+    { key: "state", label: t("col_state"), sortValue: (r) => r.state, render: (r) => <StateBadge value={r.state} /> },
+    { key: "kind", label: t("col_resolution_kind"), render: (r) => enumLabel(r.resolution_kind, lang) },
+    { key: "queued", label: t("col_queued"), sortValue: (r) => r.queued_at, render: (r) => formatTs(r.queued_at) },
   ];
 
   return (
     <Shell>
       <h1>{t("nav_compensation")}</h1>
-      <p className="notice notice-danger">
-        REVERSAL_FAILED queue — submit succeeded AND reverse failed: money may have moved without a ledger entry. Items over BDT
-        10,000 must reach RESOLVED/WRITTEN_OFF before daily TCSA attestation sign-off.
-      </p>
+      <p className="notice notice-danger">{t("comp_queue_notice")}</p>
       <div className="toolbar">
         <label className="field">
-          <span>State</span>
+          <span>{t("col_state")}</span>
           <select value={state} onChange={(e) => setState(e.target.value)}>
             <option value="">{t("all")}</option>
             {COMPENSATION_STATES.map((v) => (
               <option key={v} value={v}>
-                {v}
+                {enumLabel(v, lang)}
               </option>
             ))}
           </select>
@@ -67,7 +65,7 @@ export default function CompensationPage() {
           rowKey={(r) => r.compensation_id}
           onRowClick={(r) => router.push(`/compensation/${r.compensation_id}`)}
           rowClassName={(r) => (r.state === "QUEUED" ? "row-p0" : "")}
-          empty={loading ? t("loading") : "Queue empty"}
+          empty={loading ? t("loading") : t("empty_compensation")}
         />
       </div>
     </Shell>

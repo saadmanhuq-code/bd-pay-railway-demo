@@ -8,7 +8,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
-import { ageLabel, formatBdt, formatTs, shortId } from "../../.test-dist/lib/format.js";
+import { ageLabel, formatBdt, formatTs, formatTsCompact, shortId } from "../../.test-dist/lib/format.js";
 
 test("formatBdt groups thousands and pads paisa", () => {
   assert.equal(formatBdt(2030000), "BDT 20,300.00");
@@ -42,6 +42,19 @@ test("ageLabel renders seconds/minutes/hours/days for a recent-past timestamp", 
   assert.match(ageLabel(secondsAgo(5 * 24 * 60 * 60)), /^5d old$/);
 });
 
+test("ageLabel renders Bengali units and digits in bn mode", () => {
+  const secondsAgo = (s) => new Date(Date.now() - s * 1000).toISOString();
+  assert.equal(ageLabel(secondsAgo(5 * 60), "bn"), "৫ মিনিট আগে");
+  assert.equal(ageLabel(secondsAgo(3 * 60 * 60), "bn"), "৩ ঘণ্টা আগে");
+  assert.equal(ageLabel("not-a-date", "bn"), "অজানা");
+});
+
 test("ageLabel reports unknown age for an unparsable timestamp", () => {
   assert.equal(ageLabel("not-a-date"), "unknown age");
+});
+
+test("formatTsCompact renders Asia/Dhaka day, month and minute", () => {
+  assert.equal(formatTsCompact("2026-09-28T04:40:00Z"), "28 Sep 10:40");
+  assert.equal(formatTsCompact("2026-12-31T20:05:59Z"), "1 Jan 02:05");
+  assert.equal(formatTsCompact(null), "—");
 });

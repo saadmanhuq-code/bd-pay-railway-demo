@@ -55,17 +55,37 @@ export function shortId(id: string, keep = 14): string {
 
 // Human age between a snapshot timestamp and now — display only, never the
 // data path (mock data timestamps are fixed constants).
-export function ageLabel(iso: string): string {
+const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+/** Table-cell form of formatTs: "28 Sep 10:40" (Asia/Dhaka wall time). Pair
+ * with `title={formatTs(iso)}` so the full second-precision value is one
+ * hover away. */
+export function formatTsCompact(iso: string | null | undefined): string {
+  if (!iso) return "—";
+  const ms = Date.parse(iso);
+  if (!Number.isFinite(ms)) return "—";
+  const d = new Date(ms + 6 * 3_600_000);
+  const hh = String(d.getUTCHours()).padStart(2, "0");
+  const mm = String(d.getUTCMinutes()).padStart(2, "0");
+  return `${d.getUTCDate()} ${MONTHS[d.getUTCMonth()]} ${hh}:${mm}`;
+}
+
+const BN_DIGITS = "০১২৩৪৫৬৭৮৯";
+
+export function ageLabel(iso: string, lang: "en" | "bn" = "en"): string {
   const then = Date.parse(iso);
   const diffMs = Date.now() - then;
-  if (!Number.isFinite(diffMs)) return "unknown age";
+  const bn = lang === "bn";
+  if (!Number.isFinite(diffMs)) return bn ? "অজানা" : "unknown age";
+  const fmt = (v: number, en: string, bnUnit: string) =>
+    bn ? `${String(v).replace(/[0-9]/g, (d) => BN_DIGITS[Number(d)] ?? d)} ${bnUnit} আগে` : `${v}${en} old`;
   const s = Math.max(0, Math.floor(diffMs / 1000));
-  if (s < 90) return `${s}s old`;
+  if (s < 90) return fmt(s, "s", "সেকেন্ড");
   const m = Math.floor(s / 60);
-  if (m < 90) return `${m}m old`;
+  if (m < 90) return fmt(m, "m", "মিনিট");
   const h = Math.floor(m / 60);
-  if (h < 48) return `${h}h old`;
-  return `${Math.floor(h / 24)}d old`;
+  if (h < 48) return fmt(h, "h", "ঘণ্টা");
+  return fmt(Math.floor(h / 24), "d", "দিন");
 }
 
 

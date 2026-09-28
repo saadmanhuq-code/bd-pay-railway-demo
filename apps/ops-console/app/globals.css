@@ -217,24 +217,36 @@ h3 {
   overflow-x: auto;
 }
 
+/* Cases table: fixed layout + ellipsis clipped the type, subject, dates and
+   even state badges ("WAITING_EXTERNA…") at 1280px (FE QA 2026-09-28 pm).
+   Auto layout sizes columns to content; long cells wrap instead of clipping,
+   and narrow screens still scroll horizontally. */
 .panel-table-scroll .data-table {
   min-width: 880px;
-  table-layout: fixed;
+  table-layout: auto;
 }
 
-.panel-table-scroll .data-table th,
+.panel-table-scroll .data-table th {
+  white-space: nowrap;
+}
+
 .panel-table-scroll .data-table td {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  vertical-align: middle;
 }
 
-.panel-table-scroll .data-table td .case-subject,
-.panel-table-scroll .data-table td .case-sla {
+.panel-table-scroll .case-subject .mono {
   white-space: nowrap;
+}
+
+.panel-table-scroll .data-table td .case-sla {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  align-items: center;
 }
 
 .case-id-link {
+  white-space: nowrap;
   color: inherit;
   text-decoration: underline;
   text-underline-offset: 2px;

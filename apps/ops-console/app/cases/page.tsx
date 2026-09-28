@@ -8,11 +8,12 @@ import { DataTable, type Column } from "@bdpay/edge/ui/DataTable";
 import { PriorityBadge, SlaBadge, StateBadge } from "@/components/Badges";
 import { listCases } from "@/lib/api/client";
 import { OPS_CASE_STATES, OPS_CASE_TYPES, type OpsCase } from "@/lib/api/types";
-import { formatTs, shortId } from "@/lib/format";
+import { formatTs, formatTsCompact, shortId } from "@/lib/format";
 import { useLang } from "@/lib/i18n/LangContext";
+import { enumLabel, humanizeEnum } from "@/lib/i18n/enums";
 
 export default function CasesPage() {
-  const { t } = useLang();
+  const { t, lang } = useLang();
   const router = useRouter();
   const [rows, setRows] = useState<OpsCase[]>([]);
   const [type, setType] = useState("");
@@ -32,37 +33,38 @@ export default function CasesPage() {
   const columns: Column<OpsCase>[] = [
     {
       key: "id",
-      label: "ID",
+      label: t("col_id"),
       render: (r) => (
         <Link href={`/cases/${encodeURIComponent(r.case_id)}`} className="mono case-id-link" onClick={(e) => e.stopPropagation()}>
           {shortId(r.case_id, 18)}
         </Link>
       ),
     },
-    { key: "type", label: "Type", sortValue: (r) => r.case_type, render: (r) => r.case_type },
-    { key: "priority", label: "Priority", sortValue: (r) => r.priority, render: (r) => <PriorityBadge value={r.priority} /> },
-    { key: "state", label: "State", sortValue: (r) => r.state, render: (r) => <StateBadge value={r.state} /> },
+    { key: "type", label: t("col_type"), sortValue: (r) => r.case_type, render: (r) => <span title={r.case_type}>{enumLabel(r.case_type, lang)}</span> },
+    { key: "priority", label: t("col_priority"), sortValue: (r) => r.priority, render: (r) => <PriorityBadge value={r.priority} /> },
+    { key: "state", label: t("col_state"), sortValue: (r) => r.state, render: (r) => <StateBadge value={r.state} /> },
     {
       key: "subject",
-      label: "Subject",
+      label: t("col_subject"),
       render: (r) => (
         <span className="case-subject">
-          {r.subject_type} <span className="mono subtle">{shortId(r.subject_id, 16)}</span>
+          {humanizeEnum(r.subject_type)} <span className="mono subtle">{shortId(r.subject_id, 16)}</span>
         </span>
       ),
     },
-    { key: "assignee", label: "Assignee", sortValue: (r) => r.assignee_name ?? "", render: (r) => r.assignee_name ?? "—" },
+    { key: "assignee", label: t("col_assignee"), sortValue: (r) => r.assignee_name ?? "", render: (r) => r.assignee_name ?? "—" },
     {
       key: "sla",
-      label: "SLA due",
+      label: `${t("col_sla_due")}${lang === "bn" ? " (ঢাকা)" : " (Dhaka)"}`,
       sortValue: (r) => r.sla_due_at,
       render: (r) => (
         <span className="case-sla">
-          {formatTs(r.sla_due_at)} <SlaBadge breached={r.sla_breached} />
+          <span title={formatTs(r.sla_due_at)}>{formatTsCompact(r.sla_due_at)}</span>{" "}
+          <SlaBadge breached={r.sla_breached} />
         </span>
       ),
     },
-    { key: "opened", label: "Opened", sortValue: (r) => r.opened_at, render: (r) => formatTs(r.opened_at) },
+    { key: "opened", label: `${t("col_opened")}${lang === "bn" ? " (ঢাকা)" : " (Dhaka)"}`, sortValue: (r) => r.opened_at, render: (r) => <span title={formatTs(r.opened_at)}>{formatTsCompact(r.opened_at)}</span> },
   ];
 
   return (
@@ -70,34 +72,34 @@ export default function CasesPage() {
       <h1>{t("nav_cases")}</h1>
       <div className="toolbar">
         <label className="field">
-          <span>Type</span>
+          <span>{t("col_type")}</span>
           <select value={type} onChange={(e) => setType(e.target.value)}>
             <option value="">{t("all")}</option>
             {OPS_CASE_TYPES.map((v) => (
               <option key={v} value={v}>
-                {v}
+                {enumLabel(v, lang)}
               </option>
             ))}
           </select>
         </label>
         <label className="field">
-          <span>State</span>
+          <span>{t("col_state")}</span>
           <select value={state} onChange={(e) => setState(e.target.value)}>
             <option value="">{t("all")}</option>
             {OPS_CASE_STATES.map((v) => (
               <option key={v} value={v}>
-                {v}
+                {enumLabel(v, lang)}
               </option>
             ))}
           </select>
         </label>
         <label className="field">
-          <span>Priority</span>
+          <span>{t("col_priority")}</span>
           <select value={priority} onChange={(e) => setPriority(e.target.value)}>
             <option value="">{t("all")}</option>
             {["P0", "P1", "P2", "P3"].map((v) => (
               <option key={v} value={v}>
-                {v}
+                {enumLabel(v, lang)}
               </option>
             ))}
           </select>
@@ -117,7 +119,7 @@ export default function CasesPage() {
           rowKey={(r) => r.case_id}
           onRowClick={(r) => router.push(`/cases/${encodeURIComponent(r.case_id)}`)}
           rowClassName={(r) => (r.priority === "P0" && r.state !== "RESOLVED" && r.state !== "CANCELLED" ? "row-p0" : "")}
-          empty={loading ? t("loading") : "No cases match the filter"}
+          empty={loading ? t("loading") : t("empty_cases")}
         />
       </div>
     </Shell>

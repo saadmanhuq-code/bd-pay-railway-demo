@@ -12,5 +12,5 @@
     "rootDir": "src",
     "outDir": ".test-dist"
   },
-  "files": ["src/lib/format.ts", "src/lib/mock/detHex.ts"]
+  "files": ["src/lib/format.ts", "src/lib/mock/detHex.ts", "src/lib/i18n/enums.ts"]
 }
