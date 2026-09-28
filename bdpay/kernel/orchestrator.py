@@ -1316,12 +1316,15 @@ class PaymentOrchestrator:
         expected skip rather than a logged failure.
 
         Per-intent isolation: one failing reversal (connector unavailable,
-        conflict) does not block the others; the next sweep retries.
+        conflict) does not block the others; the next sweep retries. After all
+        intents are attempted, a safe summary raises so the scheduler records
+        the failed tick and operators can see its error count.
         """
         intents = list(
             self._store.list_intents(status="REVERSAL_INITIATED", limit=100)
         ) + list(self._store.list_intents(status="REVERSAL_PENDING", limit=100))
         dispatched: list[str] = []
+        failures = 0
         for intent in intents:
             try:
                 await self.execute_reversal(
@@ -1335,10 +1338,22 @@ class PaymentOrchestrator:
                         "retry window, skipping (hot REVERSAL_PENDING row)",
                         intent.payment_intent_id,
                     )
-                # any other ConflictError (e.g. no attempt to reverse) falls
-                # through with the same per-intent isolation as before.
-            except Exception:
-                pass
+                else:
+                    failures += 1
+                    self._log.error(
+                        "reversal dispatch failed for intent %s (conflict %s)",
+                        intent.payment_intent_id,
+                        exc.code,
+                    )
+            except Exception as exc:
+                failures += 1
+                self._log.error(
+                    "reversal dispatch failed for intent %s (%s)",
+                    intent.payment_intent_id,
+                    type(exc).__name__,
+                )
+        if failures:
+            raise RuntimeError(f"reversal dispatch failed for {failures} intent(s)")
         return dispatched
 
     # ------------------------------------------------------------------

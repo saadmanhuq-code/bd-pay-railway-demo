@@ -19,6 +19,7 @@
 // `challengeRefusalInProduction()` fails closed rather than pretending.
 
 import { isMockEnabled } from "@bdpay/edge/env-flag";
+import { resolveSessionSecret } from "@bdpay/edge/mock/signed-session";
 
 export const OTP_TTL_SECONDS = 300;
 export const OTP_MAX_ATTEMPTS = 5;
@@ -145,10 +146,11 @@ function constantTimeEqual(a: string, b: string): boolean {
 }
 
 function customerSalt(): string {
-  return (
-    process.env.BDPAY_SESSION_SECRET?.trim() ||
-    process.env.BDPAY_MOCK_SESSION_SECRET?.trim() ||
-    "bdpay-diner-app-dev-session-secret-v1"
+  // Same resolution as the diner session cookie: fails closed in production
+  // rather than salting customer ids with the public dev secret.
+  return resolveSessionSecret(
+    ["BDPAY_SESSION_SECRET", "BDPAY_MOCK_SESSION_SECRET"],
+    "bdpay-diner-app-dev-session-secret-v1",
   );
 }
 

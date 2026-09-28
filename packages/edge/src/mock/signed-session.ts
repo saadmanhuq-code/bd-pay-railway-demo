@@ -50,7 +50,8 @@ export interface SignedSessionConfig<TExtra extends object> {
    */
   secretEnvVars: readonly [string, string];
   /** The fixed development fallback secret, used only outside production
-   * and only when neither secret env var is configured. */
+   * (NODE_ENV !== "production") and only when neither secret env var is
+   * configured. Production refuses it — see `resolveSessionSecret`. */
   devSecret: string;
   /**
    * Validates the app-specific payload fields from the parsed JSON body
@@ -74,6 +75,55 @@ export interface SignedSessionInstance<TExtra extends object> {
 }
 
 const TOKEN_VERSION = "v1";
+
+/**
+ * Minimum length (in characters) of a configured session signing secret in
+ * production. `openssl rand -hex 32` yields 64 characters; 32 is the floor.
+ */
+export const SESSION_SECRET_MIN_LENGTH = 32;
+
+/** Thrown when production is missing (or has too short) a session secret. */
+export class SessionSecretConfigError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "SessionSecretConfigError";
+  }
+}
+
+/**
+ * Resolves the session signing secret: the first non-empty value among
+ * `envVars` (in order). Outside production (NODE_ENV !== "production") an
+ * unset secret falls back to `devSecret`, so local dev and tests need no
+ * setup. In production this FAILS CLOSED: a missing secret, or one shorter
+ * than SESSION_SECRET_MIN_LENGTH, throws a SessionSecretConfigError naming
+ * the env var — the public dev secret is never used to sign or verify
+ * production sessions (not even when BDPAY_ENABLE_MOCK opts the mock in).
+ */
+export function resolveSessionSecret(
+  envVars: readonly [string, string],
+  devSecret: string,
+  env: Record<string, string | undefined> = process.env,
+): string {
+  const [first, second] = envVars;
+  const configured = env[first]?.trim() || env[second]?.trim() || "";
+  const production = env.NODE_ENV === "production";
+  if (!production) return configured || devSecret;
+  if (!configured) {
+    throw new SessionSecretConfigError(
+      `${first} is required when NODE_ENV=production (legacy alias: ${second}). ` +
+        "Refusing to sign sessions with the public development secret. " +
+        `Set ${first} to a random value of at least ${SESSION_SECRET_MIN_LENGTH} characters ` +
+        "(e.g. `openssl rand -hex 32`).",
+    );
+  }
+  if (configured.length < SESSION_SECRET_MIN_LENGTH) {
+    throw new SessionSecretConfigError(
+      `${first} is too short for NODE_ENV=production: it must be at least ` +
+        `${SESSION_SECRET_MIN_LENGTH} characters (e.g. \`openssl rand -hex 32\`).`,
+    );
+  }
+  return configured;
+}
 
 const textEncoder = new TextEncoder();
 const textDecoder = new TextDecoder();
@@ -142,15 +192,7 @@ export function createSignedSession<TExtra extends object>(
   const { cookieName, ttlSeconds, secretEnvVars, devSecret, parseExtra } = config;
 
   function sessionSecret(): string {
-    const [first, second] = secretEnvVars;
-    const configured = process.env[first]?.trim() || process.env[second]?.trim();
-    if (configured) return configured;
-    // Public Railway demo: when SEC-01 mock is explicitly opted in, the
-    // documented per-app devSecret is an acceptable simulator fallback.
-    const mockFlag = process.env.BDPAY_ENABLE_MOCK?.trim().toLowerCase() ?? "";
-    if (["1", "true", "yes", "on"].includes(mockFlag)) return devSecret;
-    if (process.env.NODE_ENV === "production") return "";
-    return devSecret;
+    return resolveSessionSecret(secretEnvVars, devSecret);
   }
 
   function parsePayload(raw: string): (TExtra & { iat: number; exp: number }) | null {
