@@ -385,6 +385,18 @@ const INTENT_SEED: { env: Env; amount: string; method: PaymentIntentSummary["met
   { env: "sandbox", amount: "50000", method: "BANGLA_QR", status: "SUCCEEDED", offset: -120 },
   { env: "sandbox", amount: "10300", method: "BKASH", status: "SUCCEEDED", offset: -200 },
   { env: "sandbox", amount: "75000", method: "NPSB_IBFT", status: "REQUIRES_CONFIRMATION", offset: -240 },
+  // Older history (FE QA 2026-09-28 pm): without it "Volume today", "7 days"
+  // and "30 days" all summed the same same-day rows and showed one number.
+  { env: "live", amount: "342000", method: "CARD", status: "SUCCEEDED", offset: -60 * 24 * 3 },
+  { env: "live", amount: "1180000", method: "NPSB_IBFT", status: "SUCCEEDED", offset: -60 * 24 * 5 },
+  { env: "live", amount: "264500", method: "BKASH", status: "SUCCEEDED", offset: -60 * 24 * 11 },
+  { env: "live", amount: "905000", method: "BANGLA_QR", status: "SUCCEEDED", offset: -60 * 24 * 18 },
+  { env: "live", amount: "1432000", method: "CARD", status: "SUCCEEDED", offset: -60 * 24 * 26 },
+  { env: "sandbox", amount: "25000", method: "BKASH", status: "SUCCEEDED", offset: -60 * 24 * 2 },
+  { env: "sandbox", amount: "120000", method: "CARD", status: "SUCCEEDED", offset: -60 * 24 * 4 - 90 },
+  { env: "sandbox", amount: "64000", method: "NAGAD", status: "FAILED", offset: -60 * 24 * 6 },
+  { env: "sandbox", amount: "310000", method: "BANGLA_QR", status: "SUCCEEDED", offset: -60 * 24 * 13 },
+  { env: "sandbox", amount: "187500", method: "NPSB_IBFT", status: "SUCCEEDED", offset: -60 * 24 * 22 },
 ];
 
 const intents: PaymentIntentSummary[] = INTENT_SEED.map((s, i) => ({
@@ -419,6 +431,7 @@ export function merchantDashboard(env: Env): MerchantDashboard {
     rows.reduce((acc, r) => acc + BigInt(r.amount_minor), 0n).toString();
   const todayCut = now - 9 * 3_600_000; // rolling ~day window from wall now
   const d7Cut = now - 7 * 24 * 3_600_000;
+  const d30Cut = now - 30 * 24 * 3_600_000;
   const inWindow = (cut: number) => succeeded.filter((r) => Date.parse(r.created_at) >= cut);
   const successRateBps = terminal.length === 0 ? 0 : Math.round((succeeded.length / terminal.length) * 10_000);
   return {
@@ -426,7 +439,7 @@ export function merchantDashboard(env: Env): MerchantDashboard {
     env,
     volume_today_minor: sum(inWindow(todayCut)),
     volume_7d_minor: sum(inWindow(d7Cut)),
-    volume_30d_minor: sum(succeeded),
+    volume_30d_minor: sum(inWindow(d30Cut)),
     count_today: mine.filter((r) => Date.parse(r.created_at) >= todayCut).length,
     success_rate_bps: successRateBps,
     settlement: {
@@ -435,7 +448,7 @@ export function merchantDashboard(env: Env): MerchantDashboard {
       last_settled_minor: env === "live" ? "5230000" : "120000",
       last_settled_at: wallTs(-60 * 22),
     },
-    recent_intents: mine.slice(0, 10),
+    recent_intents: [...mine].sort((a, b) => Date.parse(b.created_at) - Date.parse(a.created_at)).slice(0, 10),
   };
 }
 
