@@ -23,7 +23,7 @@ import type {
 } from "@/lib/api/launchTypes";
 import { CERT_CHECK_IDS } from "@/lib/api/launchTypes";
 import { AgeBadge } from "@/components/Badges";
-import { PublicShell } from "@/components/PublicShell";
+import { AdaptiveShell } from "@/components/AdaptiveShell";
 import { formatTs, shortId } from "@/lib/format";
 import { useLang } from "@/lib/i18n/LangContext";
 
@@ -74,7 +74,7 @@ export default function StatusPage() {
   }, [load]);
 
   return (
-    <PublicShell>
+    <AdaptiveShell>
       <h1>{t("status_title")}</h1>
       {error ? <p className="error-text">{error}</p> : null}
       <p className="subtle">{t("status_source_note")}</p>
@@ -227,6 +227,6 @@ export default function StatusPage() {
           </tbody>
         </table>
       </section>
-    </PublicShell>
+    </AdaptiveShell>
   );
 }

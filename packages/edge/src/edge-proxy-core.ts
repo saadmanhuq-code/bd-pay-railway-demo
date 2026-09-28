@@ -71,6 +71,9 @@ export function buildCsp(nonce: string, apiBase: string | undefined = process.en
     // OSM tiles (Leaflet) + picsum demo venue photos — no paid map APIs.
     "img-src 'self' data: blob: https://tile.openstreetmap.org https://*.tile.openstreetmap.org https://picsum.photos https://fastly.picsum.photos",
     "font-src 'self'",
+    // Diner venue map: free OpenStreetMap embed iframe (default-src 'self'
+    // blocked it, leaving an empty map box — FE QA 2026-09-28).
+    "frame-src https://www.openstreetmap.org",
     connectSrc,
     "object-src 'none'",
     "base-uri 'self'",

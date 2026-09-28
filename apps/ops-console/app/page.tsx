@@ -24,6 +24,28 @@ import type {
 import { formatBdt, formatTs } from "@/lib/format";
 import { useLang } from "@/lib/i18n/LangContext";
 
+/** Bar height (%) for the TCSA trend, scaled to the observed range so small
+ * day-to-day moves are visible (a raw 0–100% scale drew six identical bars). */
+function trendHeight(v: number, all: number[]): number {
+  const min = Math.min(...all);
+  const max = Math.max(...all);
+  if (max === min) return 60;
+  return Math.round(20 + ((v - min) / (max - min)) * 80);
+}
+
+function PanelPending({ failed, onRetry }: { failed: boolean; onRetry: () => void }) {
+  const { t } = useLang();
+  if (!failed) return <p className="subtle" aria-busy="true">{t("loading")}</p>;
+  return (
+    <p className="error-text" role="alert">
+      {t("dash_panel_failed")}{" "}
+      <button className="btn btn-small" onClick={onRetry}>
+        {t("dash_retry")}
+      </button>
+    </p>
+  );
+}
+
 export default function DashboardPage() {
   const { t } = useLang();
   const [tcsa, setTcsa] = useState<TcsaDashboard | null>(null);
@@ -31,13 +53,16 @@ export default function DashboardPage() {
   const [conn, setConn] = useState<ConnectorsDashboard | null>(null);
   const [aml, setAml] = useState<AmlDashboard | null>(null);
   const [sla, setSla] = useState<SlaDashboard | null>(null);
+  const [failed, setFailed] = useState<Record<string, boolean>>({});
 
   const load = useCallback(() => {
-    getTcsaDashboard().then(setTcsa).catch(() => setTcsa(null));
-    getSettlementDashboard().then(setSettlement).catch(() => setSettlement(null));
-    getConnectorsDashboard().then(setConn).catch(() => setConn(null));
-    getAmlDashboard().then(setAml).catch(() => setAml(null));
-    getSlaDashboard().then(setSla).catch(() => setSla(null));
+    setFailed({});
+    const fail = (k: string) => () => setFailed((f) => ({ ...f, [k]: true }));
+    getTcsaDashboard().then(setTcsa).catch(fail("tcsa"));
+    getSettlementDashboard().then(setSettlement).catch(fail("settlement"));
+    getConnectorsDashboard().then(setConn).catch(fail("conn"));
+    getAmlDashboard().then(setAml).catch(fail("aml"));
+    getSlaDashboard().then(setSla).catch(fail("sla"));
   }, []);
 
   useEffect(load, [load]);
@@ -54,40 +79,44 @@ export default function DashboardPage() {
       <div className="grid-2">
         <section className="panel">
           <div className="panel-head">
-            <h2>TCSA coverage</h2>
+            <h2>{t("dash_tcsa")}</h2>
             {tcsa ? <AgeBadge asOf={tcsa.as_of} /> : null}
           </div>
           {tcsa ? (
             <>
               <div className="kpi">{(tcsa.coverage_bps / 100).toFixed(2)}%</div>
-              <div className="kpi-label">trust-account coverage (60s snapshot cadence)</div>
+              <div className="kpi-label">{t("dash_tcsa_label")}</div>
               <dl className="kv">
-                <dt>Required</dt>
+                <dt>{t("dash_required")}</dt>
                 <dd>{formatBdt(tcsa.required_minor)}</dd>
-                <dt>Available</dt>
+                <dt>{t("dash_available")}</dt>
                 <dd>{formatBdt(tcsa.available_minor)}</dd>
-                <dt>Shortfall</dt>
+                <dt>{t("dash_shortfall")}</dt>
                 <dd>{formatBdt(tcsa.shortfall_minor)}</dd>
-                <dt>Open compensation items above attestation threshold</dt>
+                <dt>{t("dash_open_comp")}</dt>
                 <dd>{tcsa.open_compensation_over_attestation_threshold}</dd>
               </dl>
-              <div className="hist-bar">
+              <div className="hist-bar" role="img" aria-label={t("dash_tcsa_trend")}>
                 {tcsa.trend.map((pt) => (
-                  <div key={pt.at} className="hist-col" title={pt.at}>
-                    <div className="hist-fill" style={{ height: `${Math.min(100, (pt.coverage_bps - 10000) / 2 + 30)}%` }} />
-                    <span>{(pt.coverage_bps / 100).toFixed(1)}</span>
+                  <div key={pt.at} className="hist-col" title={`${formatTs(pt.at)} · ${(pt.coverage_bps / 100).toFixed(2)}%`}>
+                    <div
+                      className={`hist-fill ${pt.coverage_bps < 10000 ? "hist-fill-bad" : ""}`}
+                      style={{ height: `${trendHeight(pt.coverage_bps, tcsa.trend.map((x) => x.coverage_bps))}%` }}
+                    />
+                    <span>{(pt.coverage_bps / 100).toFixed(1)}%</span>
                   </div>
                 ))}
               </div>
+              <p className="subtle">{t("dash_tcsa_trend")}</p>
             </>
           ) : (
-            <p className="subtle">{t("loading")}</p>
+            <PanelPending failed={Boolean(failed.tcsa)} onRetry={load} />
           )}
         </section>
 
         <section className="panel">
           <div className="panel-head">
-            <h2>Settlement pipeline</h2>
+            <h2>{t("dash_settlement")}</h2>
             {settlement ? <AgeBadge asOf={settlement.as_of} /> : null}
           </div>
           {settlement ? (
@@ -95,9 +124,9 @@ export default function DashboardPage() {
               <table className="data-table">
                 <thead>
                   <tr>
-                    <th>State</th>
-                    <th>Count</th>
-                    <th>Amount</th>
+                    <th>{t("dash_state")}</th>
+                    <th>{t("dash_count")}</th>
+                    <th>{t("dash_amount")}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -113,31 +142,31 @@ export default function DashboardPage() {
                 </tbody>
               </table>
               <p className="subtle">
-                Open batches: {settlement.open_batches} · earliest release {formatTs(settlement.earliest_release_at)} ·
-                latest {formatTs(settlement.latest_release_at)} · 5-working-day deadline breaches:{" "}
-                {settlement.working_day_deadline_breaches}
+                {t("dash_open_batches")}: {settlement.open_batches} · {t("dash_earliest_release")}{" "}
+                {formatTs(settlement.earliest_release_at)} · {t("dash_latest_release")} {formatTs(settlement.latest_release_at)} ·{" "}
+                {t("dash_deadline_breaches")}: {settlement.working_day_deadline_breaches}
               </p>
             </>
           ) : (
-            <p className="subtle">{t("loading")}</p>
+            <PanelPending failed={Boolean(failed.settlement)} onRetry={load} />
           )}
         </section>
       </div>
 
       <section className="panel">
         <div className="panel-head">
-          <h2>Connector health grid</h2>
+          <h2>{t("dash_connectors")}</h2>
           {conn ? <AgeBadge asOf={conn.as_of} /> : null}
         </div>
         {conn ? (
           <table className="data-table">
             <thead>
               <tr>
-                <th>Connector</th>
-                <th>Mode</th>
-                <th>Health</th>
-                <th>Circuit</th>
-                <th>Last health</th>
+                <th>{t("dash_connector")}</th>
+                <th>{t("dash_mode")}</th>
+                <th>{t("dash_health")}</th>
+                <th>{t("dash_circuit")}</th>
+                <th>{t("dash_last_health")}</th>
               </tr>
             </thead>
             <tbody>
@@ -161,20 +190,20 @@ export default function DashboardPage() {
             </tbody>
           </table>
         ) : (
-          <p className="subtle">{t("loading")}</p>
+          <PanelPending failed={Boolean(failed.conn)} onRetry={load} />
         )}
       </section>
 
       <div className="grid-2">
         <section className="panel">
           <div className="panel-head">
-            <h2>AML queue depth</h2>
+            <h2>{t("dash_aml")}</h2>
             {aml ? <AgeBadge asOf={aml.as_of} /> : null}
           </div>
           {aml ? (
             <>
               <div className="kpi">{aml.alert_queue_depth}</div>
-              <div className="kpi-label">open alerts</div>
+              <div className="kpi-label">{t("dash_open_alerts")}</div>
               <div className="hist-bar">
                 {aml.alert_age_histogram.map((b) => (
                   <div key={b.bucket} className="hist-col">
@@ -186,25 +215,26 @@ export default function DashboardPage() {
                 ))}
               </div>
               <p className="subtle">
-                Sanctions feed age: {aml.sanctions_feed_age_seconds}s {aml.sanctions_feed_stale ? "— STALE" : "(fresh)"} ·{" "}
-                <Link href="/camlco">CAMLCO dashboard →</Link>
+                {t("dash_sanctions_age")}: {Math.round(aml.sanctions_feed_age_seconds / 60)} min{" "}
+                {aml.sanctions_feed_stale ? t("dash_stale") : t("dash_fresh")} ·{" "}
+                <Link href="/camlco">{t("dash_camlco_link")}</Link>
               </p>
             </>
           ) : (
-            <p className="subtle">{t("loading")}</p>
+            <PanelPending failed={Boolean(failed.aml)} onRetry={load} />
           )}
         </section>
 
         <section className="panel">
           <div className="panel-head">
-            <h2>SLA percentiles (per route group)</h2>
+            <h2>{t("dash_sla")}</h2>
             {sla ? <AgeBadge asOf={sla.as_of} /> : null}
           </div>
           {sla ? (
             <table className="data-table">
               <thead>
                 <tr>
-                  <th>Route group</th>
+                  <th>{t("dash_route_group")}</th>
                   <th>p50</th>
                   <th>p95</th>
                   <th>p99</th>
@@ -222,7 +252,7 @@ export default function DashboardPage() {
               </tbody>
             </table>
           ) : (
-            <p className="subtle">{t("loading")}</p>
+            <PanelPending failed={Boolean(failed.sla)} onRetry={load} />
           )}
         </section>
       </div>

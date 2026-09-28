@@ -678,3 +678,80 @@ h3 {
 .meter-fill.full {
   background: #c62828;
 }
+
+/* ---------------------------------------------------------------------------
+ * Phone layout (<= 760px): topbar wraps, the 220px sidebar becomes a
+ * horizontally scrollable nav strip so pages never overflow sideways and the
+ * current section stays visible (FE QA 2026-09-28).
+ * ------------------------------------------------------------------------- */
+@media (max-width: 760px) {
+  .topbar {
+    flex-wrap: wrap;
+    gap: 6px 10px;
+    padding: 8px 12px;
+  }
+  .topbar-merchant {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .topbar-actions {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .shell {
+    flex-direction: column;
+  }
+  .sidebar {
+    width: auto;
+    flex: none;
+    padding: 0;
+    position: sticky;
+    top: 0;
+    z-index: 30;
+  }
+  .sidebar nav {
+    flex-direction: row;
+    overflow-x: auto;
+    padding: 0 4px;
+    white-space: nowrap;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .sidebar nav::-webkit-scrollbar {
+    display: none;
+  }
+  .nav-link {
+    padding: 10px 12px;
+    flex: 0 0 auto;
+  }
+  .nav-link.active {
+    border-left: 0;
+    border-bottom: 3px solid #7ac0d4;
+    padding-left: 12px;
+  }
+  .sidebar-footer {
+    display: none;
+  }
+  .content {
+    padding: 14px 12px;
+  }
+  .grid-2,
+  .grid-3 {
+    grid-template-columns: 1fr;
+  }
+  .kv {
+    grid-template-columns: 1fr;
+    gap: 2px 0;
+  }
+  .kv dd {
+    margin: 0 0 8px;
+  }
+  .data-table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+}

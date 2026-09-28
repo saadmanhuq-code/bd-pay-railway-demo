@@ -11,6 +11,7 @@ import type {
   WindowTag,
 } from "@/lib/api/types";
 import { tagsForWindows } from "@/lib/demo/windowTags";
+import { windowMatches } from "@/lib/offers/engine";
 import {
   getOsmMerchant,
   isOsmMerchantId,
@@ -661,7 +662,20 @@ export function listDemoMerchants(params: {
           }
           return true;
         });
-  return pool;
+  return withLiveOfferCounts(pool);
+}
+
+/** "N offers live now" must honour offer hours (FE QA 2026-09-28): the static
+ * catalogue counted every offer regardless of its time window. Recount against
+ * the Asia/Dhaka wall clock; keep the total in offer_count so the card can say
+ * "offers at set hours" instead of implying there are none. */
+export function withLiveOfferCounts(rows: DinerMerchant[], nowUtc: string = new Date().toISOString()): DinerMerchant[] {
+  return rows.map((m) => {
+    const offers = listDemoOffers(m.merchant_id);
+    if (offers.length === 0) return m;
+    const live = offers.filter((o) => windowMatches(o.windows, nowUtc)).length;
+    return { ...m, live_offer_count: live, offer_count: offers.length };
+  });
 }
 
 export function getDemoMerchant(merchantId: string): DinerMerchant | null {

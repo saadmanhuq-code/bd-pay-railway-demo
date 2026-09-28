@@ -38,7 +38,7 @@ export default function LoginPage() {
         {USING_MOCK_API || process.env.NODE_ENV !== "production" ? (
           <p className="notice" role="note">
             Mock demo (not live money): any email + any password + TOTP for secret{" "}
-            <code>JBSWY3DPEHPK3PXP</code>; pick a persona. See DEMO.md.
+            <code>JBSWY3DPEHPK3PXP</code> (any authenticator app), then pick a persona.
           </p>
         ) : null}
         <label className="field">

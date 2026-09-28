@@ -68,6 +68,9 @@ export interface DinerMerchant {
   cuisine: string;
   cuisine_bn: string;
   live_offer_count: number;
+  /** Total offers regardless of time window (demo catalogue); live_offer_count
+   * counts only those inside their window right now. */
+  offer_count?: number;
   best_percent_bps: number | null;
   /** EatClub-style time-window chips derived from live offer windows. */
   window_tags: WindowTag[];

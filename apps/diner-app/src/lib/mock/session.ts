@@ -10,6 +10,10 @@ import { createSignedSession, type CookieReader } from "@bdpay/edge/mock/signed-
 
 interface DinerSessionExtra {
   sub: string;
+  /** Last 3 digits of the verified mobile, for the masked "01•••••••NNN"
+   * header only (already shown on screen; never the full number). Optional
+   * so tokens issued without it stay byte-identical to the original format. */
+  ph?: string;
 }
 
 const session = createSignedSession<DinerSessionExtra>({
@@ -17,20 +21,32 @@ const session = createSignedSession<DinerSessionExtra>({
   ttlSeconds: 12 * 60 * 60,
   secretEnvVars: ["BDPAY_SESSION_SECRET", "BDPAY_MOCK_SESSION_SECRET"],
   devSecret: "bdpay-diner-app-dev-session-secret-v1",
-  parseExtra: (raw) => (typeof raw.sub === "string" && raw.sub.startsWith("cust_") ? { sub: raw.sub } : null),
+  parseExtra: (raw) => {
+    if (typeof raw.sub !== "string" || !raw.sub.startsWith("cust_")) return null;
+    return typeof raw.ph === "string" && /^\d{3}$/.test(raw.ph) ? { sub: raw.sub, ph: raw.ph } : { sub: raw.sub };
+  },
 });
 
 export const DINER_SESSION_COOKIE = session.COOKIE_NAME;
 export const DINER_SESSION_TTL_SECONDS = session.TTL_SECONDS;
 
-export async function issueDinerSession(customerId: string, issuedAt?: number): Promise<string | null> {
-  return session.issue({ sub: customerId }, issuedAt);
+export async function issueDinerSession(
+  customerId: string,
+  issuedAt?: number,
+  phoneLast3?: string,
+): Promise<string | null> {
+  return session.issue(phoneLast3 && /^\d{3}$/.test(phoneLast3) ? { sub: customerId, ph: phoneLast3 } : { sub: customerId }, issuedAt);
+}
+
+/** Verified session payload from the request cookie, or null. */
+export async function readDinerSession(req: CookieReader): Promise<{ sub: string; ph?: string; iat: number; exp: number } | null> {
+  return session.readPayload(req);
 }
 
 export async function verifyDinerSession(
   token: string,
   at?: number,
-): Promise<{ sub: string; iat: number; exp: number } | null> {
+): Promise<{ sub: string; ph?: string; iat: number; exp: number } | null> {
   return session.verify(token, at);
 }
 

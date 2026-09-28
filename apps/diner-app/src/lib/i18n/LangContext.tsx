@@ -7,17 +7,21 @@
 
 import React, { createContext, useCallback, useContext, useEffect, useState } from "react";
 import { COPY, pick, type CopyKey, type Lang } from "./copy";
+import { toBengaliDigits } from "@/lib/format";
 
 interface LangValue {
   lang: Lang;
   setLang: (lang: Lang) => void;
   t: (key: CopyKey) => string;
+  /** Localise digits: Bengali numerals (০-৯) in bn, unchanged in en. */
+  n: (value: number | string) => string;
 }
 
 const LangContext = createContext<LangValue>({
   lang: "bn",
   setLang: () => undefined,
   t: (key) => COPY[key].bn,
+  n: (value) => toBengaliDigits(String(value)),
 });
 
 const STORAGE_KEY = "bdpay-diner-lang";
@@ -44,7 +48,12 @@ export function LangProvider({ children }: { children: React.ReactNode }) {
 
   const t = useCallback((key: CopyKey) => pick(COPY[key], lang), [lang]);
 
-  return <LangContext.Provider value={{ lang, setLang, t }}>{children}</LangContext.Provider>;
+  const n = useCallback(
+    (value: number | string) => (lang === "bn" ? toBengaliDigits(String(value)) : String(value)),
+    [lang],
+  );
+
+  return <LangContext.Provider value={{ lang, setLang, t, n }}>{children}</LangContext.Provider>;
 }
 
 export function useLang(): LangValue {

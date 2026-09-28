@@ -48,7 +48,7 @@ const PAGE_SIZE = 48;
 export default function BrowsePage() {
   // Public browse — never bounce to /login from home.
   const { session, loading: sessionLoading } = useSession(false);
-  const { lang, t } = useLang();
+  const { lang, t, n } = useLang();
   const geo = useGeolocation();
 
   const [rows, setRows] = useState<MerchantRow[] | null>(null);
@@ -132,7 +132,7 @@ export default function BrowsePage() {
         <p className="hero-eyebrow">{t("hero_eyebrow")}</p>
         <h1 className="hero-title">
           {lang === "bn"
-            ? `আপনার কাছের রেস্তোরাঁয় সর্বোচ্চ ${maxDiscount}% ছাড়`
+            ? `আপনার কাছের রেস্তোরাঁয় সর্বোচ্চ ${n(maxDiscount)}% ছাড়`
             : `Up to ${maxDiscount}% off at restaurants near you`}
         </h1>
         <p className="hero-subtitle">{t("hero_subtitle")}</p>
@@ -265,8 +265,8 @@ export default function BrowsePage() {
       ) : (
         <>
           <p className="subtle results-count">
-            {t("browse_showing")} {Math.min(visibleCount, rows.length)} {t("browse_of")}{" "}
-            {rows.length} {t("browse_results")}
+            {t("browse_showing")} {n(Math.min(visibleCount, rows.length))} {t("browse_of")}{" "}
+            {n(rows.length)} {t("browse_results")}
           </p>
           {rows.slice(0, visibleCount).map((m) => (
             <Link
@@ -313,13 +313,15 @@ export default function BrowsePage() {
                 </div>
                 {m.rating_avg != null ? (
                   <div className="merchant-meta">
-                    ★ {m.rating_avg.toFixed(1)} · {m.rating_count ?? 0} {t("rating_label")}
+                    ★ {n(m.rating_avg.toFixed(1))} · {n(m.rating_count ?? 0)} {t("rating_label")}
                   </div>
                 ) : null}
                 <div className="merchant-meta">
                   {m.live_offer_count > 0
-                    ? `${m.live_offer_count} ${t("browse_offers_live")}`
-                    : t("browse_no_offers_now")}
+                    ? `${n(m.live_offer_count)} ${t("browse_offers_live")}`
+                    : (m.offer_count ?? 0) > 0
+                      ? t("browse_offers_later")
+                      : t("browse_no_offers_now")}
                 </div>
                 {(m.cuisine_tags ?? []).length > 0 ? (
                   <div className="window-tag-row">
@@ -342,7 +344,7 @@ export default function BrowsePage() {
               </div>
               {m.best_percent_bps !== null ? (
                 <span className="offer-badge">
-                  {Math.floor(m.best_percent_bps / 100)}% {t("browse_discount_off")}
+                  {n(Math.floor(m.best_percent_bps / 100))}% {t("browse_discount_off")}
                 </span>
               ) : (
                 <span className="offer-badge muted">{t("browse_no_offers_now")}</span>

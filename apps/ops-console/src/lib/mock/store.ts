@@ -63,6 +63,23 @@ function tsAt(offsetMinutes: number): string {
   return new Date(EPOCH_MS + offsetMinutes * 60_000).toISOString().replace(".000Z", "Z");
 }
 
+/** Asia/Dhaka (UTC+6, no DST) calendar day of tsAt(offsetMinutes), YYYY-MM-DD —
+ * report labels track the rolling demo clock instead of a frozen June date. */
+function dhakaDayAt(offsetMinutes: number): string {
+  return new Date(EPOCH_MS + offsetMinutes * 60_000 + 6 * 3_600_000).toISOString().slice(0, 10);
+}
+
+/** ISO-8601 week label (e.g. "2026-W39") for the Dhaka day of tsAt(offsetMinutes). */
+function isoWeekLabelAt(offsetMinutes: number): string {
+  const d = new Date(`${dhakaDayAt(offsetMinutes)}T00:00:00Z`);
+  const dow = (d.getUTCDay() + 6) % 7; // Mon=0
+  d.setUTCDate(d.getUTCDate() - dow + 3); // Thursday of this ISO week
+  const year = d.getUTCFullYear();
+  const jan4 = new Date(Date.UTC(year, 0, 4));
+  const week = 1 + Math.round((d.getTime() - jan4.getTime()) / 86_400_000 / 7 - ((jan4.getUTCDay() + 6) % 7 - 3) / 7);
+  return `${year}-W${String(week).padStart(2, "0")}`;
+}
+
 /** AgeBadge as_of — N minutes before wall now (independent of seed EPOCH). */
 export function asOfMinutesAgo(minutes: number): string {
   return new Date(Date.now() - minutes * 60_000).toISOString().replace(".000Z", "Z");
@@ -741,7 +758,7 @@ const reports: ReportItem[] = [
   {
     report_id: "rprt_" + detHex("rprt-1"),
     kind: "SETTLEMENT_FILE",
-    label: "BEFTN outward file 2026-06-11 (batch sbat_…)",
+    label: `BEFTN outward file ${dhakaDayAt(-60 * 18 - 60 * 24)} (batch sbat_…)`,
     generated_at: tsAt(-60 * 18),
     size_bytes: 48213,
     sha256: sha("report-1"),
@@ -749,7 +766,7 @@ const reports: ReportItem[] = [
   {
     report_id: "rprt_" + detHex("rprt-2"),
     kind: "RECON_REPORT",
-    label: "Daily reconciliation report 2026-06-11 (all rails)",
+    label: `Daily reconciliation report ${dhakaDayAt(-60 * 16 - 60 * 24)} (all rails)`,
     generated_at: tsAt(-60 * 16),
     size_bytes: 102400,
     sha256: sha("report-2"),
@@ -765,7 +782,7 @@ const reports: ReportItem[] = [
   {
     report_id: "rprt_" + detHex("rprt-4"),
     kind: "BB_AUDIT_EXPORT",
-    label: "BB inspector audit-event export W23",
+    label: `BB inspector audit-event export ${isoWeekLabelAt(-60 * 30)}`,
     generated_at: tsAt(-60 * 30),
     size_bytes: 5242880,
     sha256: sha("report-4"),

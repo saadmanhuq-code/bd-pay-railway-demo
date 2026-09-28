@@ -92,6 +92,16 @@ function tsAt(offsetMinutes: number): string {
   return new Date(EPOCH_MS + offsetMinutes * 60_000).toISOString().replace(".000Z", "Z");
 }
 
+/** Asia/Dhaka (UTC+6, no DST) calendar day of tsAt(offsetMinutes), YYYY-MM-DD —
+ * report labels track the rolling demo clock instead of a frozen June date. */
+function dhakaDayAt(offsetMinutes: number): string {
+  return new Date(EPOCH_MS + offsetMinutes * 60_000 + 6 * 3_600_000).toISOString().slice(0, 10);
+}
+
+function bnDigitsLocal(s: string): string {
+  return s.replace(/[0-9]/g, (d) => "০১২৩৪৫৬৭৮৯"[Number(d)]!);
+}
+
 /** AgeBadge as_of — N minutes before wall now (independent of seed EPOCH). */
 export function asOfMinutesAgo(minutes: number): string {
   return new Date(Date.now() - minutes * 60_000).toISOString().replace(".000Z", "Z");
@@ -1183,7 +1193,7 @@ const reports: ReportItem[] = [
   {
     report_id: id("rpt", "settle-0611"),
     kind: "SETTLEMENT_FILE",
-    label: "Settlement file 2026-06-11 (T+1)",
+    label: `Settlement file ${dhakaDayAt(-60 * 18 - 60 * 24)} (T+1)`,
     generated_at: tsAt(-60 * 18),
     size_bytes: 48213,
     sha256: sha("rpt:settle-0611"),
@@ -1191,7 +1201,7 @@ const reports: ReportItem[] = [
   {
     report_id: id("rpt", "recon-0611"),
     kind: "RECON_REPORT",
-    label: "Reconciliation report 2026-06-11",
+    label: `Reconciliation report ${dhakaDayAt(-60 * 17 - 60 * 24)}`,
     generated_at: tsAt(-60 * 17),
     size_bytes: 102457,
     sha256: sha("rpt:recon-0611"),
@@ -1199,7 +1209,7 @@ const reports: ReportItem[] = [
   {
     report_id: id("rpt", "va-0610"),
     kind: "VA_RECON_REPORT",
-    label: "Virtual-account recon 2026-06-10",
+    label: `Virtual-account recon ${dhakaDayAt(-60 * 41 - 60 * 24)}`,
     generated_at: tsAt(-60 * 41),
     size_bytes: 35720,
     sha256: sha("rpt:va-0610"),
@@ -1207,7 +1217,7 @@ const reports: ReportItem[] = [
   {
     report_id: id("rpt", "payout-0609"),
     kind: "PAYOUT_RETURN_FILE",
-    label: "Payout return file 2026-06-09",
+    label: `Payout return file ${dhakaDayAt(-60 * 65 - 60 * 24)}`,
     generated_at: tsAt(-60 * 65),
     size_bytes: 8112,
     sha256: sha("rpt:payout-0609"),
@@ -1239,8 +1249,8 @@ const notifications: PortalNotification[] = [
     kind: "settlement",
     title_en: "Settlement released",
     title_bn: "নিষ্পত্তি ছাড় হয়েছে",
-    body_en: "BDT 52,300.00 settled to your account ending 4417 for 2026-06-11.",
-    body_bn: "২০২৬-০৬-১১ তারিখের জন্য ৪৪১৭ শেষাঙ্কের অ্যাকাউন্টে ৫২,৩০০.০০ টাকা নিষ্পত্তি হয়েছে।",
+    body_en: `BDT 52,300.00 settled to your account ending 4417 for ${dhakaDayAt(-60 * 18 - 60 * 24)}.`,
+    body_bn: `${bnDigitsLocal(dhakaDayAt(-60 * 18 - 60 * 24))} তারিখের জন্য ৪৪১৭ শেষাঙ্কের অ্যাকাউন্টে ৫২,৩০০.০০ টাকা নিষ্পত্তি হয়েছে।`,
     read_at: null,
     created_at: tsAt(-60 * 18),
   },

@@ -35,7 +35,7 @@ const STATUS_KEYS: Record<PaymentIntentView["status"], CopyKey> = {
 
 export default function HistoryPage() {
   const { session, loading } = useSession();
-  const { lang, t } = useLang();
+  const { lang, t, n } = useLang();
   const [rows, setRows] = useState<PaymentIntentView[] | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -84,7 +84,7 @@ export default function HistoryPage() {
                 ) : null}
               </div>
               <div className="subtle">
-                {t("history_when")}: {formatTs(r.created_at)}
+                {t("history_when")}: {n(formatTs(r.created_at))}
               </div>
               {r.offer !== null ? (
                 <div className="history-amounts">

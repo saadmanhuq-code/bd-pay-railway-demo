@@ -31,6 +31,7 @@ import {
   dinerSessionCookieOptions,
   hasValidDinerSession,
   issueDinerSession,
+  readDinerSession,
 } from "@/lib/mock/session";
 
 export const dynamic = "force-dynamic";
@@ -81,10 +82,11 @@ export async function GET(req: NextRequest, ctx: Ctx): Promise<NextResponse> {
   if (p[0] !== "v1") return json(mockError("not_found", "unknown_route", "Unknown mock route."));
 
   if (p[1] === "auth" && p[2] === "diner" && p[3] === "session") {
-    if (!(await hasSession(req))) return unauthenticated();
+    const payload = await readDinerSession(req);
+    if (!payload) return unauthenticated();
     const issued = Date.now();
     const body: DinerSession = {
-      customer: getDemoCustomer(),
+      customer: getDemoCustomer(payload.ph),
       issued_at: new Date(issued).toISOString().replace(".000Z", "Z"),
       // Match cookie TTL (12h) — do not advertise the frozen June SNAPSHOT expiry.
       absolute_expires_at: new Date(issued + 12 * 3_600_000).toISOString().replace(".000Z", "Z"),
@@ -182,8 +184,8 @@ export async function POST(req: NextRequest, ctx: Ctx): Promise<NextResponse> {
       }
       const verified = verifyOtpChallenge(phone, normalizeDigits(str("otp_code")));
       if (verified.status !== 200) return json(verified);
-      const customer = getDemoCustomer();
-      const token = await issueDinerSession(customer.customer_id);
+      const customer = getDemoCustomer(phone.slice(-3));
+      const token = await issueDinerSession(customer.customer_id, undefined, phone.slice(-3));
       if (token === null) {
         return json(
           mockError(

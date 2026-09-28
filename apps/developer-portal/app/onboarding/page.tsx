@@ -15,6 +15,7 @@ import { TotpModal } from "@/components/TotpModal";
 import { formatTs, shortId } from "@/lib/format";
 import { evidencePointer, sha256OfFile } from "@/lib/hash";
 import { useLang } from "@/lib/i18n/LangContext";
+import { AdaptiveShell } from "@/components/AdaptiveShell";
 
 function Tracker({ app }: { app: OnboardingApplication }) {
   const currentIdx = KYB_TRACKER_STATES.indexOf(app.kyb_status);
@@ -93,21 +94,21 @@ function OnboardingInner() {
 
   if (error !== null) {
     return (
-      <main className="content">
+      <div className="onboarding-page">
         <h1>{t("onboarding_title")}</h1>
         <p className="error-text">{error}</p>
         <p>
           <Link href="/signup">{t("signup_title")}</Link> · <Link href="/login">{t("login_title")}</Link>
         </p>
-      </main>
+      </div>
     );
   }
   if (!app) {
-    return <main className="centered">{t("loading")}</main>;
+    return <div className="centered">{t("loading")}</div>;
   }
 
   return (
-    <main className="content">
+    <div className="onboarding-page">
       <h1>{t("onboarding_title")}</h1>
       <section className="panel">
         <div className="panel-head">
@@ -202,14 +203,16 @@ function OnboardingInner() {
           onClose={() => setPendingDoc(null)}
         />
       ) : null}
-    </main>
+    </div>
   );
 }
 
 export default function OnboardingPage() {
   return (
-    <Suspense fallback={<main className="centered">Loading…</main>}>
-      <OnboardingInner />
-    </Suspense>
+    <AdaptiveShell>
+      <Suspense fallback={<div className="centered">Loading…</div>}>
+        <OnboardingInner />
+      </Suspense>
+    </AdaptiveShell>
   );
 }

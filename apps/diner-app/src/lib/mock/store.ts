@@ -167,11 +167,14 @@ function constantTimeEqual(a: string, b: string): boolean {
   return diff === 0;
 }
 
-export function getDemoCustomer(): DinerCustomer {
+export function getDemoCustomer(phoneLast3?: string): DinerCustomer {
+  // Mask the number the diner actually signed in with (FE QA 2026-09-28: the
+  // header always read •••678 whatever number was used).
+  const last3 = phoneLast3 && /^\d{3}$/.test(phoneLast3) ? phoneLast3 : DEMO_PHONE.slice(-3);
   return {
     customer_id: DEMO_CUSTOMER_ID,
     display_name: "Demo Diner",
-    phone_masked: "01•••••••678",
+    phone_masked: `01•••••••${last3}`,
   };
 }
 

@@ -2,7 +2,7 @@
 
 // Console shell: left nav, role badge, language toggle, audit-notice footer.
 
-import React from "react";
+import React, { useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { logout, USING_MOCK_API } from "@/lib/api/client";
@@ -29,6 +29,11 @@ export function Shell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const { session, loading } = useSession();
+
+  // Phone layout: the nav is a horizontal strip — keep the current section in view.
+  useEffect(() => {
+    document.querySelector(".sidebar .nav-link.active")?.scrollIntoView({ block: "nearest", inline: "center" });
+  }, [pathname, session]);
 
   async function onLogout() {
     try {
@@ -86,8 +91,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
       <div className="content-col">
         {USING_MOCK_API ? (
           <div className="notice notice-warn" role="status" data-testid="mock-simulator-banner">
-            MOCK / SIMULATOR — not live money. In-app deterministic mock API
-            (<code>/api/mock</code>). See DEMO.md.
+            {t("mock_banner")}
           </div>
         ) : null}
         <main className="content">{children}</main>

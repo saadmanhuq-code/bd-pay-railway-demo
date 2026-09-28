@@ -51,7 +51,7 @@ function money(lang: "bn" | "en", minor: number): string {
 
 export default function MerchantOffersPage() {
   const { session, loading } = useSession(false);
-  const { lang, t } = useLang();
+  const { lang, t, n } = useLang();
   const geo = useGeolocation();
   const params = useParams<{ merchant_id: string | string[] }>();
   const merchantId = Array.isArray(params.merchant_id)
@@ -240,6 +240,11 @@ export default function MerchantOffersPage() {
           {t("demo_catalog_banner")}
         </p>
       ) : null}
+      <p className="back-link-row">
+        <Link href="/" className="back-link">
+          ← {t("venue_back")}
+        </Link>
+      </p>
       {loadError ? <p className="error-text">{loadError}</p> : null}
       {merchant ? (
         <>
@@ -257,7 +262,7 @@ export default function MerchantOffersPage() {
           </p>
           {merchant.rating_avg != null ? (
             <p className="subtle">
-              ★ {merchant.rating_avg.toFixed(1)} · {merchant.rating_count ?? 0}{" "}
+              ★ {n(merchant.rating_avg.toFixed(1))} · {n(merchant.rating_count ?? 0)}{" "}
               {t("rating_label")}
             </p>
           ) : null}
@@ -361,7 +366,7 @@ export default function MerchantOffersPage() {
                   </div>
                   {offer.percent_bps !== null ? (
                     <span className="offer-badge">
-                      {Math.floor(offer.percent_bps / 100)}% {t("browse_discount_off")}
+                      {n(Math.floor(offer.percent_bps / 100))}% {t("browse_discount_off")}
                     </span>
                   ) : null}
                 </div>
@@ -375,14 +380,14 @@ export default function MerchantOffersPage() {
                     </span>
                   ) : null}
                   <span>
-                    {t("offer_valid_until")}: {formatTs(offer.valid_until)}
+                    {t("offer_valid_until")}: {n(formatTs(offer.valid_until).slice(0, 10))}
                   </span>
                 </div>
                 <div>
                   <span className="subtle">{t("offer_windows")}: </span>
                   {offer.windows.map((w, i) => (
                     <span key={i} className="window-tag">
-                      {w.days.map((d) => t(`day_${d}` as CopyKey)).join(", ")} {w.start_local}–{w.end_local}
+                      {w.days.map((d) => t(`day_${d}` as CopyKey)).join(", ")} {n(w.start_local)}–{n(w.end_local)}
                     </span>
                   ))}
                 </div>

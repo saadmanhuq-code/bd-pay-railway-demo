@@ -176,6 +176,8 @@ export const COPY = {
   browse_area_all: { en: "All areas", bn: "সব এলাকা" },
   browse_search: { en: "Search restaurants", bn: "রেস্তোরাঁ খুঁজুন" },
   browse_offers_live: { en: "offers live now", bn: "টি অফার এখন চালু" },
+  browse_offers_later: { en: "offers at set hours — none live right now", bn: "নির্দিষ্ট সময়ে অফার — এখন চালু নেই" },
+  venue_back: { en: "All offers", bn: "সব অফার" },
   browse_no_offers_now: { en: "no offers right now", bn: "এখন কোনো অফার নেই" },
   browse_up_to: { en: "up to", bn: "সর্বোচ্চ" },
   browse_discount_off: { en: "off", bn: "ছাড়" },

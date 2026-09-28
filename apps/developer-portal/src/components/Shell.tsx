@@ -3,7 +3,7 @@
 // Portal shell: top bar (env mode badge toggle, persona badge, language
 // toggle, sign-out) + left nav.
 
-import React from "react";
+import React, { useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { logout } from "@/lib/api/client";
@@ -36,6 +36,11 @@ export function Shell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const { session, loading } = useSession();
+
+  // Phone layout: the nav is a horizontal strip — keep the current section in view.
+  useEffect(() => {
+    document.querySelector(".sidebar .nav-link.active")?.scrollIntoView({ block: "nearest", inline: "center" });
+  }, [pathname, session]);
 
   async function onLogout() {
     try {

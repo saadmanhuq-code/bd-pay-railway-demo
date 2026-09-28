@@ -931,3 +931,12 @@ h2 {
     margin-top: 10px;
   }
 }
+
+/* Venue page: explicit way back to the offer list (FE QA 2026-09-28). */
+.back-link-row {
+  margin: 4px 0 8px;
+}
+.back-link {
+  font-weight: 600;
+  font-size: 14px;
+}
