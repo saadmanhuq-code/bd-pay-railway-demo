@@ -4,6 +4,8 @@
 // maker-checker and rotate/revoke flows are demo-able within one server
 // process.
 
+import { errorDocUrl } from "@bdpay/edge/live-proxy-core";
+import { displayNameFromEmail } from "@/lib/displayName";
 import type {
   ApiKey,
   ApiKeyCreated,
@@ -159,7 +161,7 @@ export function mockError(type: ErrorType, code: string, message: string): MockR
       code,
       message,
       request_id: `req_${detHex(`req:${mutationSeq}`)}`,
-      doc_url: `https://docs.bdpay.example/errors/${code}`,
+      doc_url: errorDocUrl(code),
     },
   };
   return { status: STATUS_BY_TYPE[type], body: envelope };
@@ -211,9 +213,14 @@ const MEMBERS: Record<Persona, MerchantMember> = {
   },
 };
 
-export function getMember(persona: Persona): MerchantMember {
-  return MEMBERS[persona];
+export { displayNameFromEmail };
+
+export function getMember(persona: Persona, loginEmail?: string | null): MerchantMember {
+  const seeded = MEMBERS[persona];
+  if (!loginEmail) return seeded;
+  return { ...seeded, email: loginEmail, display_name: displayNameFromEmail(loginEmail) };
 }
+
 
 export function isPersona(v: string): v is Persona {
   return v === "owner" || v === "developer" || v === "finance_maker" || v === "finance_checker";

@@ -58,7 +58,7 @@ export function Shell({
               {t("sign_out")}
             </button>
           ) : (
-            <Link className="btn btn-small btn-primary" href={loginNext}>
+            <Link className="btn btn-small btn-on-red" href={loginNext}>
               {t("sign_in")}
             </Link>
           )}

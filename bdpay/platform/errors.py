@@ -20,6 +20,7 @@ HTTP status mirrors ``type`` per the binding table in spec 00 §4.
 
 from __future__ import annotations
 
+import os
 import re
 from typing import ClassVar
 
@@ -44,6 +45,22 @@ __all__ = [
 ]
 
 _DOC_URL_BASE = "https://docs.bdpay.example/errors/"
+#: Deployments whose docs do not live at the spec host (e.g. the Railway demo,
+#: where docs.bdpay.example does not resolve) may point ``doc_url`` at their own
+#: reference by setting this env var to a template containing ``{code}``, e.g.
+#: ``https://gateway.example/docs?error={code}#section/Errors``. Unset or
+#: without ``{code}`` -> the spec 00 §4 default above.
+DOC_URL_TEMPLATE_ENV = "BDPAY_ERROR_DOC_URL_TEMPLATE"
+
+
+def doc_url_for(code: str) -> str:
+    """The ``doc_url`` for an error code (spec default unless overridden)."""
+    template = os.environ.get(DOC_URL_TEMPLATE_ENV, "").strip()
+    if "{code}" in template:
+        return template.replace("{code}", code)
+    return f"{_DOC_URL_BASE}{code}"
+
+
 _SNAKE_CASE_RE = re.compile(r"[a-z][a-z0-9]*(?:_[a-z0-9]+)*")
 
 #: Binding type -> HTTP status table from spec 00 §4.
@@ -93,7 +110,7 @@ class BDPayError(Exception):
 
     @property
     def doc_url(self) -> str:
-        return f"{_DOC_URL_BASE}{self.code}"
+        return doc_url_for(self.code)
 
     def to_envelope(self, request_id: str) -> dict:
         """The exact binding JSON envelope shape (spec 00 §4)."""

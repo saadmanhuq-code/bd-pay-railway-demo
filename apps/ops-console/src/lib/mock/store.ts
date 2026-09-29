@@ -3,6 +3,7 @@
 // are FSM-consistent and held in module scope so approve/reject flows are
 // demo-able within a server process.
 
+import { errorDocUrl } from "@bdpay/edge/live-proxy-core";
 import type {
   AmlDashboard,
   ApprovalActionType,
@@ -138,7 +139,7 @@ export function mockError(type: ErrorType, code: string, message: string): MockR
       code,
       message,
       request_id: `req_${detHex(`req:${mutationSeq}`)}`,
-      doc_url: `https://docs.bdpay.example/errors/${code}`,
+      doc_url: errorDocUrl(code),
     },
   };
   return { status: STATUS_BY_TYPE[type], body: envelope };

@@ -6,7 +6,7 @@
 import React, { useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { logout } from "@/lib/api/client";
+import { logout, USING_MOCK_API } from "@/lib/api/client";
 import { useLang } from "@/lib/i18n/LangContext";
 import type { CopyKey } from "@/lib/i18n/copy";
 import { useMode } from "@/lib/mode";
@@ -59,7 +59,12 @@ export function Shell({ children }: { children: React.ReactNode }) {
       <header className="topbar">
         <div className="topbar-brand">{t("appName")}</div>
         <div className="topbar-merchant">
-          {session.merchant.trade_name} <span lang="bn">({session.merchant.trade_name_bn})</span>
+          {session.merchant.trade_name} <span lang="bn">({session.merchant.trade_name_bn})</span>{" "}
+          {USING_MOCK_API ? (
+            <span className="badge badge-demo" title={t("demo_merchant_hint")}>
+              {t("demo_merchant")}
+            </span>
+          ) : null}
         </div>
         <div className="topbar-actions">
           <button

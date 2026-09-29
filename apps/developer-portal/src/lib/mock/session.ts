@@ -12,7 +12,12 @@ export type PortalPersona = "owner" | "developer" | "finance_maker" | "finance_c
 
 interface PortalSessionExtra {
   persona: PortalPersona;
+  /** Login email, so the portal greets the person who signed in rather than
+   * the seeded persona (FE QA 2026-09-29). Optional: older tokens lack it. */
+  email?: string;
 }
+
+const EMAIL_RE = /^[^\s@]{1,64}@[^\s@]{1,190}$/;
 
 const VALID_PERSONAS = new Set<string>(["owner", "developer", "finance_maker", "finance_checker"]);
 
@@ -25,14 +30,23 @@ const session = createSignedSession<PortalSessionExtra>({
   ttlSeconds: 8 * 60 * 60,
   secretEnvVars: ["BDPAY_SESSION_SECRET", "BDPAY_MOCK_SESSION_SECRET"],
   devSecret: "bdpay-developer-portal-dev-session-secret-v1",
-  parseExtra: (raw) => (isPortalPersona(raw.persona) ? { persona: raw.persona } : null),
+  parseExtra: (raw) => {
+    if (!isPortalPersona(raw.persona)) return null;
+    const email = typeof raw.email === "string" && EMAIL_RE.test(raw.email) ? raw.email : undefined;
+    return email ? { persona: raw.persona, email } : { persona: raw.persona };
+  },
 });
 
 export const PORTAL_SESSION_COOKIE = session.COOKIE_NAME;
 export const PORTAL_SESSION_TTL_SECONDS = session.TTL_SECONDS;
 
-export async function issuePortalSession(persona: PortalPersona, issuedAt?: number): Promise<string | null> {
-  return session.issue({ persona }, issuedAt);
+export async function issuePortalSession(
+  persona: PortalPersona,
+  issuedAt?: number,
+  email?: string,
+): Promise<string | null> {
+  const clean = email && EMAIL_RE.test(email) ? email.toLowerCase() : undefined;
+  return session.issue(clean ? { persona, email: clean } : { persona }, issuedAt);
 }
 
 export async function verifyPortalSession(
@@ -45,6 +59,11 @@ export async function verifyPortalSession(
 export async function readPortalSessionPersona(req: CookieReader): Promise<PortalPersona | null> {
   const payload = await session.readPayload(req);
   return payload?.persona ?? null;
+}
+
+export async function readPortalSessionEmail(req: CookieReader): Promise<string | null> {
+  const payload = await session.readPayload(req);
+  return payload?.email ?? null;
 }
 
 export async function hasValidPortalSession(req: CookieReader): Promise<boolean> {

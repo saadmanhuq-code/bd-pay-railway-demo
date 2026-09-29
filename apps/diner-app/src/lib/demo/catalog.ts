@@ -699,14 +699,22 @@ export function areasForCity(city: string): Array<[string, string]> {
       if ((m.city ?? "Dhaka") !== city) continue;
       if (!seen.has(m.area)) seen.set(m.area, m.area_bn);
     }
-    return [...seen.entries()].sort((a, b) => a[0].localeCompare(b[0]));
+    return cityNamedAreaLast([...seen.entries()].sort((a, b) => a[0].localeCompare(b[0])), city);
   }
   const seen = new Map<string, string>();
   for (const m of DEMO_MERCHANTS) {
     if ((m.city ?? "Dhaka") !== city) continue;
     if (!seen.has(m.area)) seen.set(m.area, m.area_bn);
   }
-  return [...seen.entries()];
+  return cityNamedAreaLast([...seen.entries()], city);
+}
+
+/** Venues whose area is just the city name are shown as an "Other areas"
+ * chip at the end of the row, not as a neighbourhood called e.g. "Dhaka". */
+function cityNamedAreaLast(areas: Array<[string, string]>, city: string): Array<[string, string]> {
+  const rest = areas.filter(([en]) => en !== city);
+  const cityNamed = areas.filter(([en]) => en === city);
+  return [...rest, ...cityNamed];
 }
 
 export function catalogSourceLabel(): "osm" | "demo" {

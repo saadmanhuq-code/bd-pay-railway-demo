@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 
 import {
   copyHeaders,
+  errorDocUrl,
   errorEnvelope,
   errorType,
   gatewayBase,
@@ -62,6 +63,20 @@ test("errorEnvelope shape", () => {
       doc_url: "https://docs.bdpay.example/errors/unknown_route",
     },
   });
+});
+
+test("errorDocUrl uses BDPAY_ERROR_DOC_URL_TEMPLATE only when it carries {code}", () => {
+  assert.equal(errorDocUrl("unknown_route", {}), "https://docs.bdpay.example/errors/unknown_route");
+  assert.equal(
+    errorDocUrl("unknown_route", {
+      BDPAY_ERROR_DOC_URL_TEMPLATE: "https://gw.example/docs?error={code}#section/Errors",
+    }),
+    "https://gw.example/docs?error=unknown_route#section/Errors",
+  );
+  assert.equal(
+    errorDocUrl("unknown_route", { BDPAY_ERROR_DOC_URL_TEMPLATE: "https://gw.example/docs" }),
+    "https://docs.bdpay.example/errors/unknown_route",
+  );
 });
 
 test("copyHeaders copies exactly the four passthrough names and nothing else", () => {

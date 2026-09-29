@@ -92,6 +92,13 @@ a {
   border-color: rgba(255, 255, 255, 0.25);
 }
 
+.badge-demo {
+  background: rgba(245, 197, 66, 0.18);
+  color: #f5d98a;
+  border-color: rgba(245, 197, 66, 0.45);
+  vertical-align: middle;
+}
+
 .shell {
   display: flex;
   flex: 1;
@@ -221,6 +228,53 @@ h3 {
 
 .kpi-label {
   color: var(--muted);
+  font-size: 12px;
+}
+
+/* Success-rate card detail (FE QA 2026-09-29) */
+.status-mix {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line, #e3e8ee);
+}
+.status-mix .mix-title {
+  margin: 0 0 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+}
+.status-mix .mix-bar {
+  display: flex;
+  height: 10px;
+  border-radius: 5px;
+  overflow: hidden;
+  gap: 2px;
+}
+.mix-bar > span {
+  flex-basis: 0;
+}
+.mix-ok { background: #1a7f37; }
+.mix-fail { background: #c62828; }
+.mix-open { background: #d4a017; }
+.mix-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  list-style: none;
+  padding: 0;
+  margin: 10px 0 4px;
+  font-size: 13px;
+}
+.mix-dot {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  margin-right: 4px;
+}
+.mix-note,
+.mix-empty {
+  margin: 4px 0 0;
   font-size: 12px;
 }
 

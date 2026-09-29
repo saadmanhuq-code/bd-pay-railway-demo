@@ -538,6 +538,27 @@ h2 {
   margin: 14px 0 0;
 }
 
+/* Sign-in on the red hero and red top bar: white button, dark-red label
+   (FE QA 2026-09-29: red-on-red was low contrast). */
+.btn.btn-on-red {
+  background: #ffffff;
+  color: #8f1d14;
+  border: 1px solid #ffffff;
+  font-weight: 700;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.18);
+}
+
+.btn.btn-on-red:hover,
+.btn.btn-on-red:focus-visible {
+  background: #fff1ef;
+  color: #6f140d;
+}
+
+.btn.btn-on-red:focus-visible {
+  outline: 3px solid #ffd9d4;
+  outline-offset: 2px;
+}
+
 .hero-cta-row .subtle {
   color: #f7d7d3;
   font-size: 12px;

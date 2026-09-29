@@ -138,7 +138,7 @@ export default function BrowsePage() {
         <p className="hero-subtitle">{t("hero_subtitle")}</p>
         {!session && !sessionLoading ? (
           <p className="hero-cta-row">
-            <Link className="btn btn-primary" href="/login?next=/">
+            <Link className="btn btn-on-red" href="/login?next=/">
               {t("sign_in")}
             </Link>
             <span className="subtle">{t("sign_in_to_redeem_hint")}</span>
@@ -226,7 +226,7 @@ export default function BrowsePage() {
             className={`chip ${area === en ? "active" : ""}`}
             onClick={() => setArea(en)}
           >
-            {lang === "bn" ? bn : en}
+            {en === city ? t("area_other") : lang === "bn" ? bn : en}
           </button>
         ))}
       </div>

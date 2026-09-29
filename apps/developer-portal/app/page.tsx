@@ -26,6 +26,45 @@ const INTENT_COLUMNS: Column<PaymentIntentSummary>[] = [
   { key: "created", label: "Created", sortValue: (r) => r.created_at, render: (r) => formatTs(r.created_at) },
 ];
 
+// Breakdown of the recent-intents rows the server already returned (no new
+// numbers): fills the success-rate card with what sits behind the rate
+// (FE QA 2026-09-29 — the card was one number in a large empty box).
+const OUTCOMES: { key: string; label: string; cls: string; match: (s: string) => boolean }[] = [
+  { key: "ok", label: "Succeeded", cls: "mix-ok", match: (s) => s === "SUCCEEDED" || s === "PARTIALLY_REFUNDED" },
+  { key: "fail", label: "Failed", cls: "mix-fail", match: (s) => s === "FAILED" || s === "CANCELLED" },
+  { key: "open", label: "In progress", cls: "mix-open", match: () => true },
+];
+
+function StatusMix({ intents }: { intents: PaymentIntentSummary[] }) {
+  if (intents.length === 0) {
+    return <p className="subtle mix-empty">No payment intents yet — create one in the Sandbox to see outcomes here.</p>;
+  }
+  const counts = OUTCOMES.map((o) => ({ ...o, n: 0 }));
+  for (const r of intents) {
+    const hit = counts.find((o) => o.match(r.status));
+    if (hit) hit.n += 1;
+  }
+  return (
+    <div className="status-mix">
+      <p className="mix-title">Recent outcomes · last {intents.length} payment intents</p>
+      <div className="mix-bar" aria-hidden>
+        {counts
+          .filter((c) => c.n > 0)
+          .map((c) => (
+            <span key={c.key} className={c.cls} style={{ flexGrow: c.n }} />
+          ))}
+      </div>
+      <ul className="mix-legend">
+        {counts.map((c) => (
+          <li key={c.key}>
+            <span className={`mix-dot ${c.cls}`} aria-hidden /> {c.label} <strong>{c.n}</strong>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
 export default function DashboardPage() {
   const { t } = useLang();
   const { env } = useMode();
@@ -78,6 +117,7 @@ export default function DashboardPage() {
             <section className="panel">
               <div className="kpi">{(dash.success_rate_bps / 100).toFixed(2)}%</div>
               <div className="kpi-label">Success rate (terminal intents)</div>
+              <StatusMix intents={dash.recent_intents} />
             </section>
             <section className="panel">
               <h2>Settlement</h2>

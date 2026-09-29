@@ -57,6 +57,7 @@ import {
   clearPortalSessionCookieOptions,
   issuePortalSession,
   portalSessionCookieOptions,
+  readPortalSessionEmail,
   readPortalSessionPersona,
 } from "@/lib/mock/session";
 import { verifyMockTotp, type MockTotpResult } from "@bdpay/edge/mock/totp";
@@ -72,6 +73,10 @@ function json<T>(result: MockResult<T>): NextResponse {
 function page<T>(rows: T[]): NextResponse {
   const body: Paginated<T> = { data: rows, next_cursor: null };
   return NextResponse.json(body, { status: 200 });
+}
+
+async function sessionEmail(req: NextRequest): Promise<string | null> {
+  return readPortalSessionEmail(req);
 }
 
 async function sessionPersona(req: NextRequest): Promise<string> {
@@ -147,7 +152,7 @@ export async function GET(req: NextRequest, ctx: Ctx): Promise<NextResponse> {
   if (p[0] === "auth" && p[1] === "merchant" && p[2] === "session") {
     if (!isPersona(persona)) return unauthenticated();
     const body: Session = {
-      member: getMember(persona),
+      member: getMember(persona, await sessionEmail(req)),
       merchant: DEMO_MERCHANT,
       ...sessionWindow(8),
     };
@@ -265,7 +270,7 @@ export async function POST(req: NextRequest, ctx: Ctx): Promise<NextResponse> {
     if (!isPersona(persona)) {
       return json(mockError("invalid_request", "persona_invalid", "Choose a valid merchant persona."));
     }
-    const token = await issuePortalSession(persona);
+    const token = await issuePortalSession(persona, undefined, email);
     if (token === null) {
       return json(
         mockError(
@@ -275,7 +280,7 @@ export async function POST(req: NextRequest, ctx: Ctx): Promise<NextResponse> {
         ),
       );
     }
-    const res = NextResponse.json({ member: getMember(persona) }, { status: 200 });
+    const res = NextResponse.json({ member: getMember(persona, email.toLowerCase()) }, { status: 200 });
     res.cookies.set(SESSION_COOKIE, token, portalSessionCookieOptions());
     return res;
   }

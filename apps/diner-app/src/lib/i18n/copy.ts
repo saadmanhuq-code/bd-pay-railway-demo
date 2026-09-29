@@ -347,6 +347,9 @@ export const COPY = {
     en: "You can browse every deal without an account. Sign in only at payment.",
     bn: "অ্যাকাউন্ট ছাড়াই সব ডিল দেখা যায়। শুধু পেমেন্টের সময় সাইন ইন করুন।",
   },
+  // OSM venues without a neighbourhood tag carry the city name as their area;
+  // the chip for them must not read as a neighbourhood called "Dhaka".
+  area_other: { en: "Other areas", bn: "অন্যান্য এলাকা" },
   browse_results: { en: "restaurants", bn: "টি রেস্তোরাঁ" },
   browse_showing: {
     en: "Showing",

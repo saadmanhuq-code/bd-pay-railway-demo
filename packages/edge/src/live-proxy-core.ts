@@ -87,6 +87,16 @@ export interface ErrorEnvelope {
   };
 }
 
+/** The spec 00 §4 `doc_url` for an error code. A deployment whose docs are not
+ * at the spec host (the Railway demo: docs.bdpay.example does not resolve)
+ * sets BDPAY_ERROR_DOC_URL_TEMPLATE to a URL containing `{code}`, e.g.
+ * `https://gateway.example/docs?error={code}#section/Errors`. */
+export function errorDocUrl(code: string, env: NodeJS.ProcessEnv = process.env): string {
+  const template = (env.BDPAY_ERROR_DOC_URL_TEMPLATE ?? "").trim();
+  if (template.includes("{code}")) return template.split("{code}").join(code);
+  return `https://docs.bdpay.example/errors/${code}`;
+}
+
 /** The shared error response body every app's live BFF returns. */
 export function errorEnvelope(status: number, code: string, message: string): ErrorEnvelope {
   return {
@@ -95,7 +105,7 @@ export function errorEnvelope(status: number, code: string, message: string): Er
       code,
       message,
       request_id: "frontend_live_adapter",
-      doc_url: `https://docs.bdpay.example/errors/${code}`,
+      doc_url: errorDocUrl(code),
     },
   };
 }

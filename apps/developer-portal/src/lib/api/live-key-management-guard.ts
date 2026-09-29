@@ -1,5 +1,13 @@
 import type { ErrorEnvelope } from "./types";
 
+// Same rule as errorDocUrl() in @bdpay/edge/live-proxy-core (inlined: this
+// file is compiled standalone for the node unit tests).
+function errorDocUrl(code: string): string {
+  const template = (process.env.BDPAY_ERROR_DOC_URL_TEMPLATE ?? "").trim();
+  if (template.includes("{code}")) return template.split("{code}").join(code);
+  return `https://docs.bdpay.example/errors/${code}`;
+}
+
 export const LIVE_KEY_MANAGEMENT_REQUIRES_MERCHANT_AUTH_CODE =
   "live_key_management_requires_merchant_auth";
 
@@ -22,7 +30,7 @@ export function liveKeyManagementRequiresMerchantAuthEnvelope(
       code: LIVE_KEY_MANAGEMENT_REQUIRES_MERCHANT_AUTH_CODE,
       message: LIVE_KEY_MANAGEMENT_REQUIRES_MERCHANT_AUTH_MESSAGE,
       request_id: requestId,
-      doc_url: `https://docs.bdpay.example/errors/${LIVE_KEY_MANAGEMENT_REQUIRES_MERCHANT_AUTH_CODE}`,
+      doc_url: errorDocUrl(LIVE_KEY_MANAGEMENT_REQUIRES_MERCHANT_AUTH_CODE),
     },
   };
 }

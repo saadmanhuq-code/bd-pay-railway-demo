@@ -1,4 +1,5 @@
 import { tagsForWindows } from "@/lib/demo/windowTags";
+import { errorDocUrl } from "@bdpay/edge/live-proxy-core";
 import { getDemoMerchant, isLocalCatalogMerchantId, listDemoOffers } from "@/lib/demo/catalog";
 // In-app deterministic mock state for the diner-app. All seed data derives
 // from fixed constants — no Math.random / Date.now anywhere in the data path
@@ -109,7 +110,7 @@ export function mockError(type: ErrorType, code: string, message: string): MockR
       code,
       message, // PII-free, static strings only
       request_id: `req_${detHex(`req|${code}|${requestSerial}`, 16)}`,
-      doc_url: `https://docs.bdpay.example/errors/${code}`,
+      doc_url: errorDocUrl(code),
     },
   };
   return { status: STATUS_BY_TYPE[type], body: envelope };

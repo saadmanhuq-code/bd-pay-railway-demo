@@ -10,6 +10,11 @@ export interface Bi {
 }
 
 export const COPY = {
+  demo_merchant: { en: "Demo merchant", bn: "ডেমো মার্চেন্ট" },
+  demo_merchant_hint: {
+    en: "Sandbox demo: every sign-in shares this seeded merchant; your name comes from your login email.",
+    bn: "স্যান্ডবক্স ডেমো: প্রতিটি সাইন-ইন এই নমুনা মার্চেন্ট ব্যবহার করে; আপনার নাম লগইন ইমেইল থেকে নেওয়া।",
+  },
   appName: { en: "BD-PAY Developer Portal", bn: "বিডি-পে ডেভেলপার পোর্টাল" },
   nav_dashboard: { en: "Dashboard", bn: "ড্যাশবোর্ড" },
   nav_onboarding: { en: "Onboarding", bn: "অনবোর্ডিং" },
