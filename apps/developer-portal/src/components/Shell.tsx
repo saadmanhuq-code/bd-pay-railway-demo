@@ -75,6 +75,9 @@ export function Shell({ children }: { children: React.ReactNode }) {
           >
             {env === "live" ? t("env_live") : t("env_sandbox")}
           </button>
+          <span className="topbar-who" title={session.member.email}>
+            {session.member.display_name}
+          </span>
           <span className="badge badge-persona" title={t("persona")}>
             {session.member.persona}
           </span>

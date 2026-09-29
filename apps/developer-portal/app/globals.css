@@ -738,7 +738,23 @@ h3 {
  * horizontally scrollable nav strip so pages never overflow sideways and the
  * current section stays visible (FE QA 2026-09-28).
  * ------------------------------------------------------------------------- */
+/* Signed-in name in the top bar: phones only, where the sidebar footer that
+   normally shows it is hidden (FE QA 2026-09-29). */
+.topbar-who {
+  display: none;
+}
+
 @media (max-width: 760px) {
+  .topbar-who {
+    display: inline-block;
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 12px;
+    color: #d8e6ee;
+    vertical-align: middle;
+  }
   .topbar {
     flex-wrap: wrap;
     gap: 6px 10px;
@@ -769,6 +785,9 @@ h3 {
   .sidebar nav {
     flex-direction: row;
     overflow-x: auto;
+    /* fade the right edge so the scrollable tab row reads as "more →" */
+    -webkit-mask-image: linear-gradient(to right, #000 88%, transparent);
+    mask-image: linear-gradient(to right, #000 88%, transparent);
     padding: 0 4px;
     white-space: nowrap;
     scrollbar-width: none;
